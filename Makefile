@@ -92,10 +92,9 @@ $(NODE_G_EXE): config.gypi out/Makefile
 	$(MAKE) -C out BUILDTYPE=Debug V=$(V)
 	if [ ! -r $@ -o ! -L $@ ]; then ln -fs out/Debug/$(NODE_EXE) $@; fi
 
-out/Makefile: common.gypi deps/uv/uv.gyp deps/http_parser/http_parser.gyp \
-              deps/zlib/zlib.gyp deps/v8/gypfiles/toolchain.gypi \
-              deps/v8/gypfiles/features.gypi deps/v8/src/v8.gyp node.gyp \
-              config.gypi
+out/Makefile: common.gypi deps/http_parser/http_parser.gyp \
+              deps/v8/gypfiles/toolchain.gypi deps/v8/gypfiles/features.gypi \
+			  deps/v8/src/v8.gyp node.gyp config.gypi
 	$(PYTHON) tools/gyp_node.py -f make
 
 config.gypi: configure

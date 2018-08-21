@@ -97,7 +97,7 @@ out/Makefile: common.gypi deps/http_parser/http_parser.gyp \
 			  deps/v8/src/v8.gyp node.gyp config.gypi
 	$(PYTHON) tools/gyp_node.py -f make
 
-config.gypi: configure
+config.gypi: configure configure.py
 	$(error Missing or stale $@, please run ./$<)
 
 install: all ## Installs node into $PREFIX (default=/usr/local).

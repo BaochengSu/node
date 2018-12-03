@@ -36,6 +36,11 @@ import re
 import sys
 import string
 
+try:
+    xrange          # Python 2
+except NameError:
+    xrange = range  # Python 3
+
 
 def ToCArray(elements, step=10):
   slices = (elements[i:i+step] for i in xrange(0, len(elements), step))

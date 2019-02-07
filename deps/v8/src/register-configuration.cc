@@ -68,6 +68,8 @@ static int get_num_allocatable_general_registers() {
   return
 #if V8_TARGET_ARCH_IA32
       kMaxAllocatableGeneralRegisterCount;
+#elif V8_TARGET_ARCH_X87
+      kMaxAllocatableGeneralRegisterCount;
 #elif V8_TARGET_ARCH_X64
       kMaxAllocatableGeneralRegisterCount;
 #elif V8_TARGET_ARCH_ARM
@@ -90,6 +92,8 @@ static int get_num_allocatable_general_registers() {
 static int get_num_allocatable_double_registers() {
   return
 #if V8_TARGET_ARCH_IA32
+      kMaxAllocatableDoubleRegisterCount;
+#elif V8_TARGET_ARCH_X87
       kMaxAllocatableDoubleRegisterCount;
 #elif V8_TARGET_ARCH_X64
       kMaxAllocatableDoubleRegisterCount;

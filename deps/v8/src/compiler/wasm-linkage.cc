@@ -61,6 +61,14 @@ LinkageLocation stackloc(int i, MachineType type) {
 #define FP_PARAM_REGISTERS xmm1, xmm2, xmm3, xmm4, xmm5, xmm6
 #define FP_RETURN_REGISTERS xmm1, xmm2
 
+#elif V8_TARGET_ARCH_X87
+// ===========================================================================
+// == x87 ====================================================================
+// ===========================================================================
+#define GP_PARAM_REGISTERS eax, edx, ecx, ebx, esi
+#define GP_RETURN_REGISTERS eax, edx
+#define FP_RETURN_REGISTERS stX_0
+
 #elif V8_TARGET_ARCH_ARM
 // ===========================================================================
 // == arm ====================================================================
@@ -209,15 +217,21 @@ struct Allocator {
 static constexpr Register kGPReturnRegisters[] = {GP_RETURN_REGISTERS};
 static constexpr DoubleRegister kFPReturnRegisters[] = {FP_RETURN_REGISTERS};
 static constexpr Register kGPParamRegisters[] = {GP_PARAM_REGISTERS};
+#ifdef FP_PARAM_REGISTERS
 static constexpr DoubleRegister kFPParamRegisters[] = {FP_PARAM_REGISTERS};
-static constexpr Allocator return_registers(kGPReturnRegisters,
-                                            arraysize(kGPReturnRegisters),
-                                            kFPReturnRegisters,
-                                            arraysize(kFPReturnRegisters));
 static constexpr Allocator parameter_registers(kGPParamRegisters,
                                                arraysize(kGPParamRegisters),
                                                kFPParamRegisters,
                                                arraysize(kFPParamRegisters));
+#else
+static constexpr Allocator parameter_registers(kGPParamRegisters,
+                                               arraysize(kGPParamRegisters),
+                                               nullptr, 0);
+#endif
+static constexpr Allocator return_registers(kGPReturnRegisters,
+                                            arraysize(kGPReturnRegisters),
+                                            kFPReturnRegisters,
+                                            arraysize(kFPReturnRegisters));
 
 }  // namespace
 

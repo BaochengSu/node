@@ -46,6 +46,12 @@ namespace {
   rbx.bit() | r12.bit() | r13.bit() | r14.bit() | r15.bit()
 #endif
 
+#elif V8_TARGET_ARCH_X87
+// ===========================================================================
+// == x87 ====================================================================
+// ===========================================================================
+#define CALLEE_SAVE_REGISTERS esi.bit() | edi.bit() | ebx.bit()
+
 #elif V8_TARGET_ARCH_ARM
 // ===========================================================================
 // == arm ====================================================================
@@ -151,7 +157,7 @@ CallDescriptor* Linkage::GetSimplifiedCDescriptor(
                                        msig->parameter_count());
   // Check the types of the signature.
   // Currently no floating point parameters or returns are allowed because
-  // on ia32, the FP top of stack is involved.
+  // on x87 and ia32, the FP top of stack is involved.
   for (size_t i = 0; i < msig->return_count(); i++) {
     MachineRepresentation rep = msig->GetReturn(i).representation();
     CHECK_NE(MachineRepresentation::kFloat32, rep);

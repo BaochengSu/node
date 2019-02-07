@@ -356,7 +356,8 @@ void StringBuilder::AddFormattedList(const char* format, va_list list) {
   }
 }
 
-#if V8_TARGET_ARCH_IA32
+
+#if V8_TARGET_ARCH_IA32 || V8_TARGET_ARCH_X87
 static void MemMoveWrapper(void* dest, const void* src, size_t size) {
   memmove(dest, src, size);
 }
@@ -410,7 +411,7 @@ static bool g_memcopy_functions_initialized = false;
 void init_memcopy_functions(Isolate* isolate) {
   if (g_memcopy_functions_initialized) return;
   g_memcopy_functions_initialized = true;
-#if V8_TARGET_ARCH_IA32
+#if V8_TARGET_ARCH_IA32 || V8_TARGET_ARCH_X87
   MemMoveFunction generated_memmove = CreateMemMoveFunction(isolate);
   if (generated_memmove != NULL) {
     memmove_function = generated_memmove;

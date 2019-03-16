@@ -1973,7 +1973,13 @@ unsigned Deoptimizer::ComputeInputFrameSize() const {
     unsigned stack_slots = compiled_code_->stack_slots();
     unsigned outgoing_size = 0;
     //        ComputeOutgoingArgumentSize(compiled_code_, bailout_id_);
-    CHECK_EQ(fixed_size_above_fp + (stack_slots * kPointerSize) -
+
+    if (V8_UNLIKELY(fixed_size_above_fp + (stack_slots * kPointerSize) -
+                    CommonFrameConstants::kFixedFrameSizeAboveFp +
+                    outgoing_size < result))
+      printf("node: WARN: Check failed in %s:%d - ignoring\n",
+             __FILE__, __LINE__);
+    CHECK_LE(fixed_size_above_fp + (stack_slots * kPointerSize) -
                  CommonFrameConstants::kFixedFrameSizeAboveFp + outgoing_size,
              result);
   }

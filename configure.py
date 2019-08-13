@@ -7,7 +7,6 @@ import re
 import shlex
 import subprocess
 import shutil
-import string
 from distutils.spawn import find_executable as which
 
 # If not run from node/, cd to node/.
@@ -548,11 +547,14 @@ warn.warned = False
 
 def b(value):
   """Returns the string 'true' if value is truthy, 'false' otherwise."""
-  if value:
-    return 'true'
-  else:
-    return 'false'
+  return 'true' if value else 'false'
 
+def B(value):
+  """Returns 1 if value is truthy, 0 otherwise."""
+  return 1 if value else 0
+
+def to_utf8(s):
+  return s if isinstance(s, str) else s.decode("utf-8")
 
 def pkg_config(pkg):
   pkg_config = os.environ.get('PKG_CONFIG', 'pkg-config')
@@ -562,7 +564,7 @@ def pkg_config(pkg):
       proc = subprocess.Popen(
           shlex.split(pkg_config) + ['--silence-errors', flag, pkg],
           stdout=subprocess.PIPE)
-      val = proc.communicate()[0].strip()
+      val = to_utf8(proc.communicate()[0]).strip()
     except OSError as e:
       if e.errno != errno.ENOENT: raise e  # Unexpected error.
       return (None, None, None)  # No pkg-config/pkgconf installed.
@@ -577,10 +579,10 @@ def try_check_compiler(cc, lang):
   except OSError:
     return (False, False, '', '')
 
-  proc.stdin.write('__clang__ __GNUC__ __GNUC_MINOR__ __GNUC_PATCHLEVEL__ '
-                   '__clang_major__ __clang_minor__ __clang_patchlevel__')
+  proc.stdin.write(b'__clang__ __GNUC__ __GNUC_MINOR__ __GNUC_PATCHLEVEL__ '
+                   b'__clang_major__ __clang_minor__ __clang_patchlevel__')
 
-  values = (proc.communicate()[0].split() + ['0'] * 7)[0:7]
+  values = (to_utf8(proc.communicate()[0]).split() + ['0'] * 7)[0:7]
   is_clang = values[0] == '1'
   gcc_version = tuple(values[1:1+3])
   clang_version = tuple(values[4:4+3])
@@ -607,7 +609,7 @@ def get_version_helper(cc, regexp):
         ''')
     sys.exit()
 
-  match = re.search(regexp, proc.communicate()[1])
+  match = re.search(regexp, to_utf8(proc.communicate()[1]))
 
   if match:
     return match.group(2)
@@ -638,8 +640,8 @@ def get_gas_version(cc):
         ''')
     sys.exit()
 
-  match = re.match(r"GNU assembler version ([2-9]\.[0-9]+)",
-                   proc.communicate()[1])
+  gas_ret = to_utf8(proc.communicate()[1])
+  match = re.match(r"GNU assembler version ([2-9]\.[0-9]+)", gas_ret)
 
   if match:
     return match.group(1)
@@ -699,10 +701,8 @@ def cc_macros(cc=None):
         ''')
     sys.exit()
 
-  p.stdin.write('\n')
-  out = p.communicate()[0]
-
-  out = str(out).split('\n')
+  p.stdin.write(b'\n')
+  out = to_utf8(p.communicate()[0]).split('\n')
 
   k = {}
   for line in out:
@@ -1176,7 +1176,7 @@ def configure_intl(o):
     o['variables']['icu_small'] = b(True)
     locs = set(options.with_icu_locales.split(','))
     locs.add('root')  # must have root
-    o['variables']['icu_locales'] = string.join(locs,',')
+    o['variables']['icu_locales'] = ','.join(str(loc) for loc in locs)
     # We will check a bit later if we can use the canned deps/icu-small
   elif with_intl == 'full-icu':
     # full ICU

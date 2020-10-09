@@ -221,7 +221,8 @@ def Render(var, data):
   # Treat non-ASCII as UTF-8 and convert it to UTF-16.
   if any(ord(c) > 127 for c in data):
     template = TWO_BYTE_STRING
-    data = list(map(ord, data.decode('utf-8').encode('utf-16be')))
+    data = bytearray(data, 'utf-16le')
+    # data = list(map(ord, data.encode('utf-16be')))
     data = [data[i] * 256 + data[i+1] for i in range(0, len(data), 2)]
     data = ToCArray(data)
   else:
@@ -269,6 +270,7 @@ def JS2C(source, target):
     key = '%s_key' % var
     value = '%s_value' % var
 
+    print("JS2C: definitions.append: "  + name)
     definitions.append(Render(key, name))
     definitions.append(Render(value, lines))
     initializers.append(INITIALIZER.format(key=key, value=value))

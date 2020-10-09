@@ -108,6 +108,7 @@ import sys
 
 from testrunner.local import commands
 from testrunner.local import utils
+from functools import reduce
 
 ARCH_GUESS = utils.DefaultArch()
 SUPPORTED_ARCHS = ["arm",
@@ -147,7 +148,7 @@ def GeometricMean(values):
 
   The mean is calculated using log to avoid overflow.
   """
-  values = map(float, values)
+  values = list(map(float, values))
   return str(math.exp(sum(map(math.log, values)) / len(values)))
 
 
@@ -254,8 +255,8 @@ def RunResultsProcessor(results_processor, stdout, count):
       stderr=subprocess.PIPE,
   )
   result, _ = p.communicate(input=stdout)
-  print ">>> Processed stdout (#%d):" % count
-  print result
+  print(">>> Processed stdout (#%d):" % count)
+  print(result)
   return result
 
 
@@ -288,7 +289,7 @@ def AccumulateResults(
     return res
 
   # Assume all traces have the same structure.
-  if len(set(map(lambda t: len(t["results"]), res.traces))) != 1:
+  if len(set([len(t["results"]) for t in res.traces])) != 1:
     res.errors.append("Not all traces have the same number of results.")
     return res
 
@@ -335,15 +336,15 @@ def AccumulateGenericResults(graph_names, suite_units, iter_output):
         match_list = RESULT_LIST_RE.match(body)
         errors = []
         if match_stddev:
-          result, stddev = map(str.strip, match_stddev.group(1).split(","))
+          result, stddev = list(map(str.strip, match_stddev.group(1).split(",")))
           results = [result]
         elif match_list:
-          results = map(str.strip, match_list.group(1).split(","))
+          results = list(map(str.strip, match_list.group(1).split(",")))
         else:
           results = [body.strip()]
 
         try:
-          results = map(lambda r: str(float(r)), results)
+          results = [str(float(r)) for r in results]
         except ValueError:
           results = []
           errors = ["Found non-numeric in %s" %
@@ -358,7 +359,7 @@ def AccumulateGenericResults(graph_names, suite_units, iter_output):
         trace_result.traces[0]["results"].extend(results)
         trace_result.traces[0]["stddev"] = stddev
 
-  return reduce(lambda r, t: r + t, traces.itervalues(), Results())
+  return reduce(lambda r, t: r + t, iter(traces.values()), Results())
 
 
 class Node(object):
@@ -400,7 +401,7 @@ class GraphConfig(Node):
     self._suite = suite
 
     assert isinstance(suite.get("path", []), list)
-    assert isinstance(suite["name"], basestring)
+    assert isinstance(suite["name"], str)
     assert isinstance(suite.get("flags", []), list)
     assert isinstance(suite.get("test_flags", []), list)
     assert isinstance(suite.get("resources", []), list)
@@ -500,7 +501,7 @@ class RunnableConfig(GraphConfig):
     if self.binary.endswith(".py"):
       cmd = [sys.executable] + cmd
     if self.binary != 'd8' and '--prof' in extra_flags:
-      print "Profiler supported only on a benchmark run with d8"
+      print("Profiler supported only on a benchmark run with d8")
     return cmd + self.GetCommandFlags(extra_flags=extra_flags)
 
   def Run(self, runner, trybot):
@@ -693,25 +694,25 @@ class DesktopPlatform(Platform):
         timeout=runnable.timeout,
       )
     except OSError as e:  # pragma: no cover
-      print title % "OSError"
-      print e
+      print(title % "OSError")
+      print(e)
       return ""
 
-    print title % "Stdout"
-    print output.stdout
+    print(title % "Stdout")
+    print(output.stdout)
     if output.stderr:  # pragma: no cover
       # Print stderr for debugging.
-      print title % "Stderr"
-      print output.stderr
+      print(title % "Stderr")
+      print(output.stderr)
     if output.timed_out:
-      print ">>> Test timed out after %ss." % runnable.timeout
+      print(">>> Test timed out after %ss." % runnable.timeout)
     if '--prof' in self.extra_flags:
       os_prefix = {"linux": "linux", "macos": "mac"}.get(utils.GuessOS())
       if os_prefix:
         tick_tools = os.path.join(TOOLS_BASE, "%s-tick-processor" % os_prefix)
         subprocess.check_call(tick_tools + " --only-summary", shell=True)
       else:  # pragma: no cover
-        print "Profiler option currently supported on Linux and Mac OS."
+        print("Profiler option currently supported on Linux and Mac OS.")
 
     # time outputs to stderr
     if runnable.process_size:
@@ -850,10 +851,10 @@ class AndroidPlatform(Platform):  # pragma: no cover
           retries=0,
       )
       stdout = "\n".join(output)
-      print title % "Stdout"
-      print stdout
+      print(title % "Stdout")
+      print(stdout)
     except device_errors.CommandTimeoutError:
-      print ">>> Test timed out after %ss." % runnable.timeout
+      print(">>> Test timed out after %ss." % runnable.timeout)
       stdout = ""
     if runnable.process_size:
       return stdout + "MaxMemory: Unsupported"
@@ -887,7 +888,7 @@ class CustomMachineConfiguration:
       with open("/proc/sys/kernel/randomize_va_space", "r") as f:
         return int(f.readline().strip())
     except Exception as e:
-      print "Failed to get current ASLR settings."
+      print("Failed to get current ASLR settings.")
       raise e
 
   @staticmethod
@@ -896,8 +897,8 @@ class CustomMachineConfiguration:
       with open("/proc/sys/kernel/randomize_va_space", "w") as f:
         f.write(str(value))
     except Exception as e:
-      print "Failed to update ASLR to %s." % value
-      print "Are we running under sudo?"
+      print("Failed to update ASLR to %s." % value)
+      print("Are we running under sudo?")
       raise e
 
     new_value = CustomMachineConfiguration.GetASLR()
@@ -909,12 +910,12 @@ class CustomMachineConfiguration:
     try:
       with open("/sys/devices/system/cpu/present", "r") as f:
         indexes = f.readline()
-        r = map(int, indexes.split("-"))
+        r = list(map(int, indexes.split("-")))
         if len(r) == 1:
-          return range(r[0], r[0] + 1)
-        return range(r[0], r[1] + 1)
+          return list(range(r[0], r[0] + 1))
+        return list(range(r[0], r[1] + 1))
     except Exception as e:
-      print "Failed to retrieve number of CPUs."
+      print("Failed to retrieve number of CPUs.")
       raise e
 
   @staticmethod
@@ -940,8 +941,8 @@ class CustomMachineConfiguration:
             raise Exception("CPU cores have differing governor settings")
       return ret
     except Exception as e:
-      print "Failed to get the current CPU governor."
-      print "Is the CPU governor disabled? Check BIOS."
+      print("Failed to get the current CPU governor.")
+      print("Is the CPU governor disabled? Check BIOS.")
       raise e
 
   @staticmethod
@@ -954,8 +955,8 @@ class CustomMachineConfiguration:
           f.write(value)
 
     except Exception as e:
-      print "Failed to change CPU governor to %s." % value
-      print "Are we running under sudo?"
+      print("Failed to change CPU governor to %s." % value)
+      print("Are we running under sudo?")
       raise e
 
     cur_value = CustomMachineConfiguration.GetCPUGovernor()
@@ -1033,11 +1034,11 @@ def Main(args):
     options.arch = ARCH_GUESS
 
   if not options.arch in SUPPORTED_ARCHS:  # pragma: no cover
-    print "Unknown architecture %s" % options.arch
+    print("Unknown architecture %s" % options.arch)
     return 1
 
   if options.device and not options.android_build_tools:  # pragma: no cover
-    print "Specifying a device requires Android build tools."
+    print("Specifying a device requires Android build tools.")
     return 1
 
   if (options.json_test_results_no_patch and
@@ -1058,10 +1059,10 @@ def Main(args):
     default_binary_name = "d8"
   else:
     if not os.path.isfile(options.binary_override_path):
-      print "binary-override-path must be a file name"
+      print("binary-override-path must be a file name")
       return 1
     if options.outdir_no_patch:
-      print "specify either binary-override-path or outdir-no-patch"
+      print("specify either binary-override-path or outdir-no-patch")
       return 1
     options.shell_dir = os.path.abspath(
         os.path.dirname(options.binary_override_path))
@@ -1082,7 +1083,7 @@ def Main(args):
 
   # Ensure all arguments have absolute path before we start changing current
   # directory.
-  args = map(os.path.abspath, args)
+  args = list(map(os.path.abspath, args))
 
   prev_aslr = None
   prev_cpu_gov = None
@@ -1119,11 +1120,11 @@ def Main(args):
         runnable_name = "/".join(runnable.graphs)
         if not runnable_name.startswith(options.filter):
           continue
-        print ">>> Running suite: %s" % runnable_name
+        print(">>> Running suite: %s" % runnable_name)
 
         def Runner():
           """Output generator that reruns several times."""
-          for i in xrange(0, max(1, runnable.run_count)):
+          for i in range(0, max(1, runnable.run_count)):
             # TODO(machenbach): Allow timeout per arch like with run_count per
             # arch.
             yield platform.Run(runnable, i)
@@ -1138,12 +1139,12 @@ def Main(args):
     if options.json_test_results:
       results.WriteToFile(options.json_test_results)
     else:  # pragma: no cover
-      print results
+      print(results)
 
   if options.json_test_results_no_patch:
     results_no_patch.WriteToFile(options.json_test_results_no_patch)
   else:  # pragma: no cover
-    print results_no_patch
+    print(results_no_patch)
 
   return min(1, len(results.errors))
 

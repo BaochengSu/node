@@ -28,8 +28,8 @@
 import os
 import re
 
-from variants import ALL_VARIANTS
-from utils import Freeze
+from .variants import ALL_VARIANTS
+from .utils import Freeze
 
 # These outcomes can occur in a TestCase's outcomes list:
 SKIP = "SKIP"
@@ -251,7 +251,7 @@ def PresubmitCheck(path):
   status = {"success": True}
   def _assert(check, message):  # Like "assert", but doesn't throw.
     if not check:
-      print("%s: Error: %s" % (path, message))
+      print(("%s: Error: %s" % (path, message)))
       status["success"] = False
   try:
     for section in contents:
@@ -273,5 +273,5 @@ def PresubmitCheck(path):
                   "missing file for %s test %s" % (basename, rule))
     return status["success"]
   except Exception as e:
-    print e
+    print(e)
     return False

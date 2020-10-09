@@ -51,7 +51,7 @@ def Win32SetErrorMode(mode):
 
 
 def RunProcess(verbose, timeout, args, additional_env, **rest):
-  if verbose: print "#", " ".join(args)
+  if verbose: print("#", " ".join(args))
   popen_args = args
   prev_error_mode = SEM_INVALID_VALUE
   if utils.IsWindows():
@@ -91,7 +91,7 @@ def RunProcess(verbose, timeout, args, additional_env, **rest):
     try:
       if utils.IsWindows():
         if verbose:
-          print "Attempting to kill process %d" % process.pid
+          print("Attempting to kill process %d" % process.pid)
           sys.stdout.flush()
         tk = subprocess.Popen(
             'taskkill /T /F /PID %d' % process.pid,
@@ -100,10 +100,10 @@ def RunProcess(verbose, timeout, args, additional_env, **rest):
         )
         stdout, stderr = tk.communicate()
         if verbose:
-          print "Taskkill results for %d" % process.pid
-          print stdout
-          print stderr
-          print "Return code: %d" % tk.returncode
+          print("Taskkill results for %d" % process.pid)
+          print(stdout)
+          print(stderr)
+          print("Return code: %d" % tk.returncode)
           sys.stdout.flush()
       else:
         process.kill()

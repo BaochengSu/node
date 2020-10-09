@@ -53,12 +53,12 @@ VALGRIND_ARGUMENTS = [
 ]
 
 if len(sys.argv) < 2:
-  print 'Please provide an executable to analyze.'
+  print('Please provide an executable to analyze.')
   sys.exit(1)
 
 executable = path.join(V8_ROOT, sys.argv[1])
 if not path.exists(executable):
-  print 'Cannot find the file specified: %s' % executable
+  print('Cannot find the file specified: %s' % executable)
   sys.exit(1)
 
 # Compute the command line.

@@ -37,8 +37,8 @@ if __name__ == '__main__':
   processes = multiprocessing.cpu_count()
   pool = multiprocessing.Pool(processes=processes)
   cmdlines = ["%s %s" % (sys.argv[1], filename) for filename in sys.argv[2:]]
-  for filename, result in itertools.izip(
+  for filename, result in zip(
       sys.argv[2:], pool.imap(invoke, cmdlines)):
-    print "______________ %s" % filename
-    print result[0]
-    print "______________ finish %d ______________" % result[1]
+    print("______________ %s" % filename)
+    print(result[0])
+    print("______________ finish %d ______________" % result[1])

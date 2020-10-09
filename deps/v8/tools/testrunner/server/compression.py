@@ -26,7 +26,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-import cStringIO as StringIO
+import io as StringIO
 try:
   import ujson as json
 except ImportError:

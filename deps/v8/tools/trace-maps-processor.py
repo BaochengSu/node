@@ -9,11 +9,11 @@ import sys
 action = sys.argv[1]
 
 if action in ["help", "-h", "--help"] or len(sys.argv) != 3:
-  print("Usage: %s <action> <inputfile>, where action can be: \n"
+  print(("Usage: %s <action> <inputfile>, where action can be: \n"
         "help    Print this message\n"
         "plain   Print ASCII tree to stdout\n"
         "dot     Print dot file to stdout\n"
-        "count   Count most frequent transition reasons\n" % sys.argv[0])
+        "count   Count most frequent transition reasons\n" % sys.argv[0]))
   sys.exit(0)
 
 
@@ -77,8 +77,8 @@ def AddTransition(from_map, to_map, reason):
       targets[to_map].reason = reason
       return
     # Unexpected duplicate events? Warn.
-    print("// warning: already have a transition from %s to %s, reason: %s" %
-            (from_map, to_map, targets[to_map].reason))
+    print(("// warning: already have a transition from %s to %s, reason: %s" %
+            (from_map, to_map, targets[to_map].reason)))
     return
   targets[to_map] = Transition(from_map, to_map, reason)
 
@@ -99,7 +99,7 @@ with open(filename, "r") as f:
       from_map = words[3]
       to_map = words[5]
       if from_map not in annotations:
-        print("// warning: unknown from_map %s" % from_map)
+        print(("// warning: unknown from_map %s" % from_map))
         new_map = AddMap(from_map, "<unknown>")
         root_maps.append(new_map)
       if to_map != last_to_map:
@@ -120,7 +120,7 @@ with open(filename, "r") as f:
 
 
 def PlainPrint(m, indent, label):
-  print("%s%s (%s)" % (indent, m, label))
+  print(("%s%s (%s)" % (indent, m, label)))
   if m in transitions:
     for t in transitions[m]:
       PlainPrint(t, indent + "  ", transitions[m][t].reason)
@@ -132,12 +132,12 @@ def CountTransitions(m):
 
 
 def DotPrint(m, label):
-  print("m%s [label=\"%s\"]" % (m[2:], label))
+  print(("m%s [label=\"%s\"]" % (m[2:], label)))
   if m in transitions:
     for t in transitions[m]:
       # GraphViz doesn't like node labels looking like numbers, so use
       # "m..." instead of "0x...".
-      print("m%s -> m%s" % (m[2:], t[2:]))
+      print(("m%s -> m%s" % (m[2:], t[2:])))
       reason = transitions[m][t].reason
       reason = reason.replace("\\", "BACKSLASH")
       reason = reason.replace("\"", "\\\"")
@@ -169,4 +169,4 @@ elif action == "count":
     reasons_list.append("%8d %s" % (reasons[r], r))
   reasons_list.sort(reverse=True)
   for r in reasons_list[:20]:
-    print r
+    print(r)

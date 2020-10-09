@@ -12,7 +12,7 @@ from standard input or via the --filename option. Examples:
   %prog -f results.json -t "ia32 results" -o results.html
 '''
 
-import commands
+import subprocess
 import json
 import math
 from optparse import OptionParser
@@ -124,7 +124,7 @@ class Benchmark:
     return self.tests_
 
   def SortedTestKeys(self):
-    keys = self.tests_.keys()
+    keys = list(self.tests_.keys())
     keys.sort()
     t = "Total"
     if t in keys:

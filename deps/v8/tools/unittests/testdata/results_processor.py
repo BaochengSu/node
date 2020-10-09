@@ -21,5 +21,5 @@ for line in fileinput.input():
   if match:
     deltablue += float(match.group(1))
 
-print 'Richards: %f' % richards
-print 'DeltaBlue: %f' % deltablue
+print('Richards: %f' % richards)
+print('DeltaBlue: %f' % deltablue)

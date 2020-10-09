@@ -81,11 +81,11 @@ class SearchArchitecturePorts(Step):
 
         # Is this revision included in the original revision list?
         if git_hash in self["full_revision_list"]:
-          print("Found port of %s -> %s (already included): %s"
-                % (revision, git_hash, revision_title))
+          print(("Found port of %s -> %s (already included): %s"
+                % (revision, git_hash, revision_title)))
         else:
-          print("Found port of %s -> %s: %s"
-                % (revision, git_hash, revision_title))
+          print(("Found port of %s -> %s: %s"
+                % (revision, git_hash, revision_title)))
           port_revision_list.append(git_hash)
 
     # Do we find any port?
@@ -124,7 +124,7 @@ class CreateCommitMessage(Step):
       msg = self.GitLog(n=1, git_hash=commit_hash)
       for bug in re.findall(r"^[ \t]*BUG[ \t]*=[ \t]*(.*?)[ \t]*$", msg, re.M):
         bugs.extend(s.strip() for s in bug.split(","))
-    bug_aggregate = ",".join(sorted(filter(lambda s: s and s != "none", bugs)))
+    bug_aggregate = ",".join(sorted([s for s in bugs if s and s != "none"]))
     if bug_aggregate:
       msg_pieces.append("BUG=%s\nLOG=N\n" % bug_aggregate)
 
@@ -136,8 +136,8 @@ class ApplyPatches(Step):
 
   def RunStep(self):
     for commit_hash in self["full_revision_list"]:
-      print("Applying patch for %s to %s..."
-            % (commit_hash, self["merge_to_branch"]))
+      print(("Applying patch for %s to %s..."
+            % (commit_hash, self["merge_to_branch"])))
       patch = self.GitGetPatch(commit_hash)
       TextToFile(patch, self.Config("TEMPORARY_PATCH_FILE"))
       self.ApplyPatch(self.Config("TEMPORARY_PATCH_FILE"))
@@ -202,7 +202,7 @@ class TagRevision(Step):
   MESSAGE = "Create the tag."
 
   def RunStep(self):
-    print "Creating tag %s" % self["version"]
+    print("Creating tag %s" % self["version"])
     self.vc.Tag(self["version"],
                 self.vc.RemoteBranch(self["merge_to_branch"]),
                 self["commit_title"])
@@ -213,11 +213,11 @@ class CleanUp(Step):
 
   def RunStep(self):
     self.CommonCleanup()
-    print "*** SUMMARY ***"
-    print "version: %s" % self["version"]
-    print "branch: %s" % self["merge_to_branch"]
+    print("*** SUMMARY ***")
+    print("version: %s" % self["version"])
+    print("branch: %s" % self["merge_to_branch"])
     if self["revision_list"]:
-      print "patches: %s" % self["revision_list"]
+      print("patches: %s" % self["revision_list"])
 
 
 class RollMerge(ScriptsBase):
@@ -241,10 +241,10 @@ class RollMerge(ScriptsBase):
   def _ProcessOptions(self, options):
     if len(options.revisions) < 1:
       if not options.patch:
-        print "Either a patch file or revision numbers must be specified"
+        print("Either a patch file or revision numbers must be specified")
         return False
       if not options.message:
-        print "You must specify a merge comment if no patches are specified"
+        print("You must specify a merge comment if no patches are specified")
         return False
     options.bypass_upload_hooks = True
     # CC ulan to make sure that fixes are merged to Google3.
@@ -254,8 +254,8 @@ class RollMerge(ScriptsBase):
     for revision in options.revisions:
       if (IsSvnNumber(revision) or
           (revision[0:1] == "r" and IsSvnNumber(revision[1:]))):
-        print "Please provide full git hashes of the patches to merge."
-        print "Got: %s" % revision
+        print("Please provide full git hashes of the patches to merge.")
+        print("Got: %s" % revision)
         return False
     return True
 

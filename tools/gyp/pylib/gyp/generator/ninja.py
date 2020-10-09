@@ -18,7 +18,7 @@ from gyp.common import OrderedSet
 import gyp.msvs_emulation
 import gyp.MSVSUtil as MSVSUtil
 import gyp.xcode_emulation
-from cStringIO import StringIO
+from io import StringIO
 
 from gyp.common import GetEnvironFallback
 import gyp.ninja_syntax as ninja_syntax
@@ -350,7 +350,7 @@ class NinjaWriter(object):
 
     Uses a stamp file if necessary."""
 
-    assert targets == filter(None, targets), targets
+    assert targets == [_f for _f in targets if _f], targets
     if len(targets) == 0:
       assert not order_only
       return None
@@ -427,8 +427,8 @@ class NinjaWriter(object):
           compile_depends.append(target.PreCompileInput())
           if target.uses_cpp:
             self.target.uses_cpp = True
-      actions_depends = filter(None, actions_depends)
-      compile_depends = filter(None, compile_depends)
+      actions_depends = [_f for _f in actions_depends if _f]
+      compile_depends = [_f for _f in compile_depends if _f]
       actions_depends = self.WriteCollapsedDependencies('actions_depends',
                                                         actions_depends)
       compile_depends = self.WriteCollapsedDependencies('compile_depends',
@@ -455,8 +455,8 @@ class NinjaWriter(object):
     try:
       sources = extra_sources + spec.get('sources', [])
     except TypeError:
-      print 'extra_sources: ', str(extra_sources)
-      print 'spec.get("sources"): ', str(spec.get('sources'))
+      print('extra_sources: ', str(extra_sources))
+      print('spec.get("sources"): ', str(spec.get('sources')))
       raise
     if sources:
       if self.flavor == 'mac' and len(self.archs) > 1:
@@ -485,8 +485,8 @@ class NinjaWriter(object):
         if self.flavor != 'mac' or len(self.archs) == 1:
           link_deps += [self.GypPathToNinja(o) for o in obj_outputs]
         else:
-          print "Warning: Actions/rules writing object files don't work with " \
-                "multiarch targets, dropping. (target %s)" % spec['target_name']
+          print("Warning: Actions/rules writing object files don't work with " \
+                "multiarch targets, dropping. (target %s)" % spec['target_name'])
     elif self.flavor == 'mac' and len(self.archs) > 1:
       link_deps = collections.defaultdict(list)
 
@@ -544,7 +544,7 @@ class NinjaWriter(object):
     if self.msvs_settings.HasExplicitIdlRulesOrActions(spec):
       return []
     outputs = []
-    for source in filter(lambda x: x.endswith('.idl'), spec['sources']):
+    for source in [x for x in spec['sources'] if x.endswith('.idl')]:
       self._WinIdlRule(source, prebuild, outputs)
     return outputs
 
@@ -791,10 +791,10 @@ class NinjaWriter(object):
     copy_headers = spec['mac_framework_headers']
     output = self.GypPathToUniqueOutput('headers.hmap')
     self.xcode_settings.header_map_path = output
-    all_headers = map(self.GypPathToNinja,
-                      filter(lambda x:x.endswith(('.h')), all_sources))
+    all_headers = list(map(self.GypPathToNinja,
+                      [x for x in all_sources if x.endswith(('.h'))]))
     variables = [('framework', framework),
-                 ('copy_headers', map(self.GypPathToNinja, copy_headers))]
+                 ('copy_headers', list(map(self.GypPathToNinja, copy_headers)))]
     outputs.extend(self.ninja.build(
         output, 'compile_ios_framework_headers', all_headers,
         variables=variables, order_only=prebuild))
@@ -810,7 +810,7 @@ class NinjaWriter(object):
 
     for output, res in gyp.xcode_emulation.GetMacBundleResources(
         generator_default_variables['PRODUCT_DIR'],
-        self.xcode_settings, map(self.GypPathToNinja, resources)):
+        self.xcode_settings, list(map(self.GypPathToNinja, resources))):
       output = self.ExpandSpecial(output)
       if os.path.splitext(output)[-1] != '.xcassets':
         self.ninja.build(output, 'mac_tool', res,
@@ -838,7 +838,7 @@ class NinjaWriter(object):
         'XCASSETS_LAUNCH_IMAGE': 'launch-image',
     }
     settings = self.xcode_settings.xcode_settings[self.config_name]
-    for settings_key, arg_name in settings_to_arg.iteritems():
+    for settings_key, arg_name in settings_to_arg.items():
       value = settings.get(settings_key)
       if value:
         extra_arguments[arg_name] = value
@@ -978,7 +978,7 @@ class NinjaWriter(object):
                            [Define(d, self.flavor) for d in defines])
     if self.flavor == 'win':
       self.WriteVariableList(ninja_file, 'asmflags',
-                             map(self.ExpandSpecial, asmflags))
+                             list(map(self.ExpandSpecial, asmflags)))
       self.WriteVariableList(ninja_file, 'rcflags',
           [QuoteShellArgument(self.ExpandSpecial(f), self.flavor)
            for f in self.msvs_settings.GetRcflags(config_name,
@@ -1013,18 +1013,18 @@ class NinjaWriter(object):
     arflags = config.get('arflags', [])
 
     self.WriteVariableList(ninja_file, 'cflags',
-                           map(self.ExpandSpecial, cflags))
+                           list(map(self.ExpandSpecial, cflags)))
     self.WriteVariableList(ninja_file, 'cflags_c',
-                           map(self.ExpandSpecial, cflags_c))
+                           list(map(self.ExpandSpecial, cflags_c)))
     self.WriteVariableList(ninja_file, 'cflags_cc',
-                           map(self.ExpandSpecial, cflags_cc))
+                           list(map(self.ExpandSpecial, cflags_cc)))
     if self.flavor == 'mac':
       self.WriteVariableList(ninja_file, 'cflags_objc',
-                             map(self.ExpandSpecial, cflags_objc))
+                             list(map(self.ExpandSpecial, cflags_objc)))
       self.WriteVariableList(ninja_file, 'cflags_objcc',
-                             map(self.ExpandSpecial, cflags_objcc))
+                             list(map(self.ExpandSpecial, cflags_objcc)))
     self.WriteVariableList(ninja_file, 'arflags',
-                           map(self.ExpandSpecial, arflags))
+                           list(map(self.ExpandSpecial, arflags)))
     ninja_file.newline()
     outputs = []
     has_rc_source = False
@@ -1233,7 +1233,7 @@ class NinjaWriter(object):
           ldflags.append('-Wl,-rpath=%s' % self.target_rpath)
         ldflags.append('-Wl,-rpath-link=%s' % rpath)
     self.WriteVariableList(ninja_file, 'ldflags',
-                           map(self.ExpandSpecial, ldflags))
+                           list(map(self.ExpandSpecial, ldflags)))
 
     library_dirs = config.get('library_dirs', [])
     if self.flavor == 'win':
@@ -1247,8 +1247,8 @@ class NinjaWriter(object):
                                          self.flavor)
                       for l in library_dirs]
 
-    libraries = gyp.common.uniquer(map(self.ExpandSpecial,
-                                       spec.get('libraries', [])))
+    libraries = gyp.common.uniquer(list(map(self.ExpandSpecial,
+                                       spec.get('libraries', []))))
     if self.flavor == 'mac':
       libraries = self.xcode_settings.AdjustLibraries(libraries, config_name)
     elif self.flavor == 'win':
@@ -1943,7 +1943,7 @@ def GenerateOutputForConfig(target_list, target_dicts, data, params,
       wrappers[key[:-len('_wrapper')]] = os.path.join(build_to_root, value)
 
   # Support wrappers from environment variables too.
-  for key, value in os.environ.iteritems():
+  for key, value in os.environ.items():
     if key.lower().endswith('_wrapper'):
       key_prefix = key[:-len('_wrapper')]
       key_prefix = re.sub(r'\.HOST$', '.host', key_prefix)
@@ -1963,7 +1963,7 @@ def GenerateOutputForConfig(target_list, target_dicts, data, params,
               configs, generator_flags)
     cl_paths = gyp.msvs_emulation.GenerateEnvironmentFiles(
         toplevel_build, generator_flags, shared_system_includes, OpenOutput)
-    for arch, path in sorted(cl_paths.iteritems()):
+    for arch, path in sorted(cl_paths.items()):
       if clang_cl:
         # If we have selected clang-cl, use that instead.
         path = clang_cl
@@ -2437,7 +2437,7 @@ def PerformBuild(data, configurations, params):
   for config in configurations:
     builddir = os.path.join(options.toplevel_dir, 'out', config)
     arguments = ['ninja', '-C', builddir]
-    print 'Building [%s]: %s' % (config, arguments)
+    print('Building [%s]: %s' % (config, arguments))
     subprocess.check_call(arguments)
 
 
@@ -2465,7 +2465,7 @@ def GenerateOutput(target_list, target_dicts, data, params):
     GenerateOutputForConfig(target_list, target_dicts, data, params,
                             user_config)
   else:
-    config_names = target_dicts[target_list[0]]['configurations'].keys()
+    config_names = list(target_dicts[target_list[0]]['configurations'].keys())
     if params['parallel']:
       try:
         pool = multiprocessing.Pool(len(config_names))
@@ -2474,7 +2474,7 @@ def GenerateOutput(target_list, target_dicts, data, params):
           arglists.append(
               (target_list, target_dicts, data, params, config_name))
         pool.map(CallGenerateOutputForConfig, arglists)
-      except KeyboardInterrupt, e:
+      except KeyboardInterrupt as e:
         pool.terminate()
         raise e
     else:

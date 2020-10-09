@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import StringIO
+import io
 import unittest
 import linux_perf_bytecode_annotate as bytecode_annotate
 
@@ -66,13 +66,13 @@ Instructions (size = 5)
 class LinuxPerfBytecodeAnnotateTest(unittest.TestCase):
 
   def test_bytecode_offset_generator(self):
-    perf_stream = StringIO.StringIO(PERF_SCRIPT_OUTPUT)
+    perf_stream = io.StringIO(PERF_SCRIPT_OUTPUT)
     offsets = list(
         bytecode_annotate.bytecode_offset_generator(perf_stream, "bar"))
     self.assertListEqual(offsets, [18, 25, 18, 18])
 
   def test_bytecode_disassembly_generator(self):
-    codegen_stream = StringIO.StringIO(D8_CODEGEN_OUTPUT)
+    codegen_stream = io.StringIO(D8_CODEGEN_OUTPUT)
     disassembly = list(
         bytecode_annotate.bytecode_disassembly_generator(codegen_stream, "bar"))
     self.assertListEqual(disassembly, [

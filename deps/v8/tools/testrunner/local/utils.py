@@ -33,7 +33,7 @@ from os.path import join
 import platform
 import re
 import subprocess
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 
 def GetSuitePaths(test_root):
@@ -132,10 +132,10 @@ def URLRetrieve(source, destination):
       return
     except:
       # If there's no curl, fall back to urlopen.
-      print "Curl is currently not installed. Falling back to python."
+      print("Curl is currently not installed. Falling back to python.")
       pass
   with open(destination, 'w') as f:
-    f.write(urllib2.urlopen(source).read())
+    f.write(urllib.request.urlopen(source).read())
 
 
 class FrozenDict(dict):
@@ -148,7 +148,7 @@ class FrozenDict(dict):
 
 def Freeze(obj):
   if isinstance(obj, dict):
-    return FrozenDict((k, Freeze(v)) for k, v in obj.iteritems())
+    return FrozenDict((k, Freeze(v)) for k, v in obj.items())
   elif isinstance(obj, set):
     return frozenset(obj)
   elif isinstance(obj, list):

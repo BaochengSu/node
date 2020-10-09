@@ -15,10 +15,10 @@ PY2 = sys.version_info[0] == 2
 if not PY2:
     text_type = str
     string_types = (str,)
-    unichr = chr
+    chr = chr
     int_types = (int,)
 else:
-    text_type = unicode
-    string_types = (str, unicode)
-    unichr = unichr
-    int_types = (int, long)
+    text_type = str
+    string_types = (str, str)
+    chr = chr
+    int_types = (int, int)

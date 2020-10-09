@@ -72,8 +72,8 @@ def Assign(suites, peers):
       while peers[index].needed_work <= 0:
         index += 1
         if index == len(peers):
-          print("BIG FAT WARNING: Assigning tests to peers failed. "
-                "Remaining tests: %d. Going to slow mode." % len(shell.tests))
+          print(("BIG FAT WARNING: Assigning tests to peers failed. "
+                "Remaining tests: %d. Going to slow mode." % len(shell.tests)))
           # Pick the least-busy peer. Sorting the list for each test
           # is terribly slow, but this is just an emergency fallback anyway.
           peers.sort(cmp=lambda x, y: cmp(x.needed_work, y.needed_work))

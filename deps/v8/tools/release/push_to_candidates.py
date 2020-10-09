@@ -30,7 +30,7 @@ import argparse
 import os
 import sys
 import tempfile
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 from common_includes import *
 
@@ -46,7 +46,7 @@ class Preparation(Step):
 
     if(self["current_branch"] == self.Config("CANDIDATESBRANCH")
        or self["current_branch"] == self.Config("BRANCHNAME")):
-      print "Warning: Script started on branch %s" % self["current_branch"]
+      print("Warning: Script started on branch %s" % self["current_branch"])
 
     self.PrepareBranch()
     self.DeleteBranch(self.Config("CANDIDATESBRANCH"))
@@ -103,7 +103,7 @@ class IncrementVersion(Step):
                                     self["new_minor"],
                                     self["new_build"])
 
-    print ("Incremented version to %s" % self["version"])
+    print(("Incremented version to %s" % self["version"]))
 
 
 class DetectLastRelease(Step):
@@ -318,9 +318,9 @@ class CleanUp(Step):
   MESSAGE = "Done!"
 
   def RunStep(self):
-    print("Congratulations, you have successfully created the candidates "
+    print(("Congratulations, you have successfully created the candidates "
           "revision %s."
-          % self["version"])
+          % self["version"]))
 
     self.CommonCleanup()
     if self.Config("CANDIDATESBRANCH") != self["current_branch"]:
@@ -347,10 +347,10 @@ class PushToCandidates(ScriptsBase):
 
   def _ProcessOptions(self, options):  # pragma: no cover
     if not options.manual and not options.reviewer:
-      print "A reviewer (-r) is required in (semi-)automatic mode."
+      print("A reviewer (-r) is required in (semi-)automatic mode.")
       return False
     if not options.manual and not options.author:
-      print "Specify your chromium.org email with -a in (semi-)automatic mode."
+      print("Specify your chromium.org email with -a in (semi-)automatic mode.")
       return False
 
     options.tbr_commit = not options.manual

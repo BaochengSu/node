@@ -35,6 +35,7 @@ import os, re
 import optparse
 import jsmin
 import textwrap
+from functools import reduce
 
 
 class Error(Exception):
@@ -147,7 +148,7 @@ class TextMacro:
   def expand(self, mapping):
     # Keys could be substrings of earlier values. To avoid unintended
     # clobbering, apply all replacements simultaneously.
-    any_key_pattern = "|".join(re.escape(k) for k in mapping.iterkeys())
+    any_key_pattern = "|".join(re.escape(k) for k in mapping.keys())
     def replace(match):
       return mapping[match.group(0)]
     return re.sub(any_key_pattern, replace, self.body)
@@ -386,14 +387,14 @@ def PrepareSources(source_files, native_type, emit_js):
     An instance of Sources.
   """
   macro_file = None
-  macro_files = filter(IsMacroFile, source_files)
+  macro_files = list(filter(IsMacroFile, source_files))
   assert len(macro_files) in [0, 1]
   if macro_files:
     source_files.remove(macro_files[0])
     macro_file = macro_files[0]
 
   message_template_file = None
-  message_template_files = filter(IsMessageTemplateFile, source_files)
+  message_template_files = list(filter(IsMessageTemplateFile, source_files))
   assert len(message_template_files) in [0, 1]
   if message_template_files:
     source_files.remove(message_template_files[0])
@@ -453,14 +454,14 @@ def BuildMetadata(sources, source_bytes, native_type):
   raw_sources = "".join(sources.modules)
 
   # The sources are expected to be ASCII-only.
-  assert not filter(lambda value: ord(value) >= 128, raw_sources)
+  assert not [value for value in raw_sources if ord(value) >= 128]
 
   # Loop over modules and build up indices into the source blob:
   get_index_cases = []
   get_script_name_cases = []
   get_script_source_cases = []
   offset = 0
-  for i in xrange(len(sources.modules)):
+  for i in range(len(sources.modules)):
     native_name = "native %s.js" % sources.names[i]
     d = {
         "i": i,
@@ -502,7 +503,7 @@ def PutInt(blob_file, value):
   value_with_length = (value << 2) | (size - 1)
 
   byte_sequence = bytearray()
-  for i in xrange(size):
+  for i in range(size):
     byte_sequence.append(value_with_length & 255)
     value_with_length >>= 8;
   blob_file.write(byte_sequence)
@@ -525,12 +526,12 @@ def WriteStartupBlob(sources, startup_blob):
 
   debug_sources = sum(sources.is_debugger_id);
   PutInt(output, debug_sources)
-  for i in xrange(debug_sources):
+  for i in range(debug_sources):
     PutStr(output, sources.names[i]);
     PutStr(output, sources.modules[i]);
 
   PutInt(output, len(sources.names) - debug_sources)
-  for i in xrange(debug_sources, len(sources.names)):
+  for i in range(debug_sources, len(sources.names)):
     PutStr(output, sources.names[i]);
     PutStr(output, sources.modules[i]);
 

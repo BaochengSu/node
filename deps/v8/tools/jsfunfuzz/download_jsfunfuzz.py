@@ -19,4 +19,4 @@ if re.search(r'\bjsfunfuzz=1', os.environ.get('GYP_DEFINES', '')):
     '--platform=linux*'
   ])
 else:
-  print 'Skipping jsfunfuzz download as jsfunfuzz is not set in gyp flags.'
+  print('Skipping jsfunfuzz download as jsfunfuzz is not set in gyp flags.')

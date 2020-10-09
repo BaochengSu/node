@@ -7,7 +7,7 @@
 #
 
 
-from __future__ import with_statement
+
 import re
 
 def split_nvp(s):

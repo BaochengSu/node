@@ -272,7 +272,7 @@ def WriteActions(target_name, actions, extra_sources, extra_deps,
     dirs = set(dir for dir in (os.path.dirname(o) for o in outputs) if dir)
 
     if int(action.get('process_outputs_as_sources', False)):
-      extra_sources.extend(zip(cmake_outputs, outputs))
+      extra_sources.extend(list(zip(cmake_outputs, outputs)))
 
     # add_custom_command
     output.write('add_custom_command(OUTPUT ')
@@ -639,8 +639,8 @@ def WriteTarget(namer, qualified_target, target_dicts, build_dir, config_to_use,
 
   cmake_target_type = cmake_target_type_from_gyp_target_type.get(target_type)
   if cmake_target_type is None:
-    print ('Target %s has unknown target type %s, skipping.' %
-          (        target_name,               target_type  ) )
+    print(('Target %s has unknown target type %s, skipping.' %
+          (        target_name,               target_type  ) ))
     return
 
   SetVariable(output, 'TARGET', target_name)
@@ -863,8 +863,8 @@ def WriteTarget(namer, qualified_target, target_dicts, build_dir, config_to_use,
       default_product_ext = generator_default_variables['SHARED_LIB_SUFFIX']
 
     elif target_type != 'executable':
-      print ('ERROR: What output file should be generated?',
-              'type', target_type, 'target', target_name)
+      print(('ERROR: What output file should be generated?',
+              'type', target_type, 'target', target_name))
 
     product_prefix = spec.get('product_prefix', default_product_prefix)
     product_name = spec.get('product_name', default_product_name)
@@ -1180,11 +1180,11 @@ def PerformBuild(data, configurations, params):
                                               output_dir,
                                               config_name))
     arguments = ['cmake', '-G', 'Ninja']
-    print 'Generating [%s]: %s' % (config_name, arguments)
+    print('Generating [%s]: %s' % (config_name, arguments))
     subprocess.check_call(arguments, cwd=build_dir)
 
     arguments = ['ninja', '-C', build_dir]
-    print 'Building [%s]: %s' % (config_name, arguments)
+    print('Building [%s]: %s' % (config_name, arguments))
     subprocess.check_call(arguments)
 
 
@@ -1203,7 +1203,7 @@ def GenerateOutput(target_list, target_dicts, data, params):
     GenerateOutputForConfig(target_list, target_dicts, data,
                             params, user_config)
   else:
-    config_names = target_dicts[target_list[0]]['configurations'].keys()
+    config_names = list(target_dicts[target_list[0]]['configurations'].keys())
     if params['parallel']:
       try:
         pool = multiprocessing.Pool(len(config_names))
@@ -1212,7 +1212,7 @@ def GenerateOutput(target_list, target_dicts, data, params):
           arglists.append((target_list, target_dicts, data,
                            params, config_name))
           pool.map(CallGenerateOutputForConfig, arglists)
-      except KeyboardInterrupt, e:
+      except KeyboardInterrupt as e:
         pool.terminate()
         raise e
     else:

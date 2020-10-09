@@ -90,7 +90,7 @@ def param_type(domain_name, param):
         if type_id in ref_types:
             return ref_types[type_id]
         else:
-            print "Type not found: " + type_id
+            print("Type not found: " + type_id)
             return "!! Type not found: " + type_id
 
 

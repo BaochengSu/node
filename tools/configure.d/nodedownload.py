@@ -6,12 +6,11 @@ import hashlib
 import sys
 import zipfile
 import tarfile
-import fpformat
 import contextlib
 
 def formatSize(amt):
     """Format a size as a string in MB"""
-    return fpformat.fix(amt / 1024000., 1)
+    return "%.1f" % (amt / 1024000.)
 
 def spin(c):
     """print out an ASCII 'spinner' based on the value of counter 'c'"""

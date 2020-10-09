@@ -35,7 +35,7 @@ import os, re
 import optparse
 import jsmin
 import textwrap
-from functools import reduce
+from functools import reduce, cmp_to_key
 
 
 class Error(Exception):
@@ -407,8 +407,8 @@ def PrepareSources(source_files, native_type, emit_js):
     filters = BuildFilterChain(macro_file, message_template_file)
 
   # Sort 'debugger' sources first.
-  source_files = sorted(source_files,
-                        lambda l,r: IsDebuggerFile(r) - IsDebuggerFile(l))
+  source_files = sorted(source_files, 
+    key=cmp_to_key(lambda l,r: IsDebuggerFile(r) - IsDebuggerFile(l)))
 
   source_files_and_contents = [(f, ReadFile(f)) for f in source_files]
 
@@ -511,7 +511,7 @@ def PutInt(blob_file, value):
 
 def PutStr(blob_file, value):
   PutInt(blob_file, len(value));
-  blob_file.write(value);
+  blob_file.write(value.encode('utf-8'))
 
 
 def WriteStartupBlob(sources, startup_blob):

@@ -365,7 +365,7 @@ def load_objects():
 
         if (len(checktypes) > 0):
                 for klass in checktypes:
-                        print('error: expected class \"%s\" not found' % klass);
+                        print(('error: expected class \"%s\" not found' % klass));
 
                 sys.exit(1);
 
@@ -636,7 +636,7 @@ def emit_config():
 
         out.write('/* class type information */\n');
         consts = [];
-        keys = typeclasses.keys();
+        keys = list(typeclasses.keys());
         keys.sort();
         for typename in keys:
                 klass = typeclasses[typename];
@@ -649,7 +649,7 @@ def emit_config():
 
         out.write('/* class hierarchy information */\n');
         consts = [];
-        keys = klasses.keys();
+        keys = list(klasses.keys());
         keys.sort();
         for klassname in keys:
                 pklass = klasses[klassname]['parent'];
@@ -672,7 +672,7 @@ def emit_config():
         out.write(footer);
 
 if (len(sys.argv) < 4):
-        print('usage: %s output.cc objects.h objects-inl.h' % sys.argv[0]);
+        print(('usage: %s output.cc objects.h objects-inl.h' % sys.argv[0]));
         sys.exit(2);
 
 load_objects();

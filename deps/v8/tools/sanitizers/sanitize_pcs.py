@@ -8,4 +8,4 @@
 import sys;
 
 for line in sys.stdin:
-  print '0x%x' % (int(line.strip(), 16) + 4)
+  print('0x%x' % (int(line.strip(), 16) + 4))

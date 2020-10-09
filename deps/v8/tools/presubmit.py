@@ -30,7 +30,7 @@
 try:
   import hashlib
   md5er = hashlib.md5
-except ImportError, e:
+except ImportError as e:
   import md5
   md5er = md5.new
 
@@ -86,7 +86,7 @@ def CppLintWorker(command):
       out_line = process.stderr.readline()
       if out_line == '' and process.poll() != None:
         if error_count == -1:
-          print "Failed to process %s" % command.pop()
+          print("Failed to process %s" % command.pop())
           return 1
         break
       m = LINT_OUTPUT_PATTERN.match(out_line)
@@ -98,8 +98,8 @@ def CppLintWorker(command):
   except KeyboardInterrupt:
     process.kill()
   except:
-    print('Error running cpplint.py. Please make sure you have depot_tools' +
-          ' in your $PATH. Lint check skipped.')
+    print(('Error running cpplint.py. Please make sure you have depot_tools' +
+          ' in your $PATH. Lint check skipped.'))
     process.kill()
 
 
@@ -245,7 +245,7 @@ class CppLintProcessor(SourceFileProcessor):
     good_files_cache.Load()
     files = good_files_cache.FilterUnchangedFiles(files)
     if len(files) == 0:
-      print 'No changes in files detected. Skipping cpplint check.'
+      print('No changes in files detected. Skipping cpplint check.')
       return True
 
     filters = ",".join([n for n in LINT_RULES])
@@ -263,7 +263,7 @@ class CppLintProcessor(SourceFileProcessor):
     try:
       results = pool.map_async(CppLintWorker, commands).get(999999)
     except KeyboardInterrupt:
-      print "\nCaught KeyboardInterrupt, terminating workers."
+      print("\nCaught KeyboardInterrupt, terminating workers.")
       sys.exit(1)
 
     for i in range(len(files)):
@@ -271,7 +271,7 @@ class CppLintProcessor(SourceFileProcessor):
         good_files_cache.RemoveFile(files[i])
 
     total_errors = sum(results)
-    print "Total errors found: %d" % total_errors
+    print("Total errors found: %d" % total_errors)
     good_files_cache.Save()
     return total_errors == 0
 
@@ -397,12 +397,12 @@ class SourceProcessor(SourceFileProcessor):
     base = basename(name)
     if not base in SourceProcessor.IGNORE_TABS:
       if '\t' in contents:
-        print "%s contains tabs" % name
+        print("%s contains tabs" % name)
         result = False
     if not base in SourceProcessor.IGNORE_COPYRIGHTS and \
         not SourceProcessor.IGNORE_COPYRIGHTS_DIRECTORY in name:
       if not COPYRIGHT_HEADER_PATTERN.search(contents):
-        print "%s is missing a correct copyright header." % name
+        print("%s is missing a correct copyright header." % name)
         result = False
     if ' \n' in contents or contents.endswith(' '):
       line = 0
@@ -415,34 +415,34 @@ class SourceProcessor(SourceFileProcessor):
         lines.append(str(line))
       linenumbers = ', '.join(lines)
       if len(lines) > 1:
-        print "%s has trailing whitespaces in lines %s." % (name, linenumbers)
+        print("%s has trailing whitespaces in lines %s." % (name, linenumbers))
       else:
-        print "%s has trailing whitespaces in line %s." % (name, linenumbers)
+        print("%s has trailing whitespaces in line %s." % (name, linenumbers))
       result = False
     if not contents.endswith('\n') or contents.endswith('\n\n'):
-      print "%s does not end with a single new line." % name
+      print("%s does not end with a single new line." % name)
       result = False
     # Sanitize flags for fuzzer.
     if "mjsunit" in name or "debugger" in name:
       match = FLAGS_LINE.search(contents)
       if match:
-        print "%s Flags should use '-' (not '_')" % name
+        print("%s Flags should use '-' (not '_')" % name)
         result = False
       if not "mjsunit/mjsunit.js" in name:
         if ASSERT_OPTIMIZED_PATTERN.search(contents) and \
             not FLAGS_ENABLE_OPT.search(contents):
-          print "%s Flag --opt should be set if " \
-                "assertOptimized() is used" % name
+          print("%s Flag --opt should be set if " \
+                "assertOptimized() is used" % name)
           result = False
         if ASSERT_UNOPTIMIZED_PATTERN.search(contents) and \
             not FLAGS_NO_ALWAYS_OPT.search(contents):
-          print "%s Flag --no-always-opt should be set if " \
-                "assertUnoptimized() is used" % name
+          print("%s Flag --no-always-opt should be set if " \
+                "assertUnoptimized() is used" % name)
           result = False
 
       match = self.runtime_function_call_pattern.search(contents)
       if match:
-        print "%s has unexpected spaces in a runtime call '%s'" % (name, match.group(1))
+        print("%s has unexpected spaces in a runtime call '%s'" % (name, match.group(1)))
         result = False
     return result
 
@@ -458,7 +458,7 @@ class SourceProcessor(SourceFileProcessor):
           violations += 1
       finally:
         handle.close()
-    print "Total violating files: %s" % violations
+    print("Total violating files: %s" % violations)
     return success
 
 def _CheckStatusFileForDuplicateKeys(filepath):
@@ -496,7 +496,7 @@ def _CheckStatusFileForDuplicateKeys(filepath):
     keys = {}
     for key, value in pairs:
       if key in keys:
-        print("%s: Error: duplicate key %s" % (filepath, key))
+        print(("%s: Error: duplicate key %s" % (filepath, key)))
         status["success"] = False
       keys[key] = True
 
@@ -562,17 +562,17 @@ def Main():
   parser = GetOptions()
   (options, args) = parser.parse_args()
   success = True
-  print "Running checkdeps..."
+  print("Running checkdeps...")
   success &= CheckDeps(workspace)
-  print "Running C++ lint check..."
+  print("Running C++ lint check...")
   if not options.no_lint:
     success &= CppLintProcessor().RunOnPath(workspace)
-  print "Running copyright header, trailing whitespaces and " \
-        "two empty lines between declarations check..."
+  print("Running copyright header, trailing whitespaces and " \
+        "two empty lines between declarations check...")
   success &= SourceProcessor().RunOnPath(workspace)
-  print "Running status-files check..."
+  print("Running status-files check...")
   success &= StatusFilesProcessor().RunOnPath(workspace)
-  print "Running python tests..."
+  print("Running python tests...")
   success &= PyTests(workspace)
   if success:
     return 0

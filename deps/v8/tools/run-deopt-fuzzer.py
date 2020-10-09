@@ -83,14 +83,14 @@ DISTRIBUTION_MODES = ["smooth", "random"]
 
 class RandomDistribution:
   def __init__(self, seed=None):
-    seed = seed or random.randint(1, sys.maxint)
-    print "Using random distribution with seed %d" % seed
+    seed = seed or random.randint(1, sys.maxsize)
+    print("Using random distribution with seed %d" % seed)
     self._random = random.Random(seed)
 
   def Distribute(self, n, m):
     if n > m:
       n = m
-    return self._random.sample(xrange(1, m + 1), n)
+    return self._random.sample(range(1, m + 1), n)
 
 
 class SmoothDistribution:
@@ -200,7 +200,7 @@ def BuildOptions():
   result.add_option("-p", "--progress",
                     help=("The style of progress indicator"
                           " (verbose, dots, color, mono)"),
-                    choices=progress.PROGRESS_INDICATORS.keys(),
+                    choices=list(progress.PROGRESS_INDICATORS.keys()),
                     default="mono")
   result.add_option("--shard-count",
                     help="Split testsuites into this number of shards",
@@ -232,14 +232,14 @@ def ProcessOptions(options):
   options.mode = options.mode.split(",")
   for mode in options.mode:
     if not mode.lower() in ["debug", "release"]:
-      print "Unknown mode %s" % mode
+      print("Unknown mode %s" % mode)
       return False
   if options.arch in ["auto", "native"]:
     options.arch = ARCH_GUESS
   options.arch = options.arch.split(",")
   for arch in options.arch:
     if not arch in SUPPORTED_ARCHS:
-      print "Unknown architecture %s" % arch
+      print("Unknown architecture %s" % arch)
       return False
 
   # Special processing of other options, sorted alphabetically.
@@ -250,23 +250,23 @@ def ProcessOptions(options):
   while options.random_seed == 0:
     options.random_seed = random.SystemRandom().randint(-2147483648, 2147483647)
   if not options.distribution_mode in DISTRIBUTION_MODES:
-    print "Unknown distribution mode %s" % options.distribution_mode
+    print("Unknown distribution mode %s" % options.distribution_mode)
     return False
   if options.distribution_factor1 < 0.0:
-    print ("Distribution factor1 %s is out of range. Defaulting to 0.0"
-        % options.distribution_factor1)
+    print(("Distribution factor1 %s is out of range. Defaulting to 0.0"
+        % options.distribution_factor1))
     options.distribution_factor1 = 0.0
   if options.distribution_factor2 < 0.0:
-    print ("Distribution factor2 %s is out of range. Defaulting to 0.0"
-        % options.distribution_factor2)
+    print(("Distribution factor2 %s is out of range. Defaulting to 0.0"
+        % options.distribution_factor2))
     options.distribution_factor2 = 0.0
   if options.coverage < 0.0 or options.coverage > 1.0:
-    print ("Coverage %s is out of range. Defaulting to 0.4"
-        % options.coverage)
+    print(("Coverage %s is out of range. Defaulting to 0.4"
+        % options.coverage))
     options.coverage = 0.4
   if options.coverage_lift < 0:
-    print ("Coverage lift %s is out of range. Defaulting to 0"
-        % options.coverage_lift)
+    print(("Coverage lift %s is out of range. Defaulting to 0"
+        % options.coverage_lift))
     options.coverage_lift = 0
   return True
 
@@ -275,8 +275,8 @@ def ShardTests(tests, shard_count, shard_run):
   if shard_count < 2:
     return tests
   if shard_run < 1 or shard_run > shard_count:
-    print "shard-run not a valid number, should be in [1:shard-count]"
-    print "defaulting back to running all tests"
+    print("shard-run not a valid number, should be in [1:shard-count]")
+    print("defaulting back to running all tests")
     return tests
   count = 0
   shard = []
@@ -344,7 +344,7 @@ def CalculateNTests(m, options):
 
 
 def Execute(arch, mode, args, options, suites, workspace):
-  print(">>> Running tests for %s.%s" % (arch, mode))
+  print((">>> Running tests for %s.%s" % (arch, mode)))
 
   dist = Distribution(options)
 
@@ -430,7 +430,7 @@ def Execute(arch, mode, args, options, suites, workspace):
       test_id += 1
 
   if num_tests == 0:
-    print "No tests to run."
+    print("No tests to run.")
     return 0
 
   print(">>> Collection phase")
@@ -450,16 +450,16 @@ def Execute(arch, mode, args, options, suites, workspace):
           test_results[t.path] = MAX_DEOPT - int(line.split(" ")[-1])
     for t in s.tests:
       if t.path not in test_results:
-        print "Missing results for %s" % t.path
+        print("Missing results for %s" % t.path)
     if options.dump_results_file:
-      results_dict = dict((t.path, n) for (t, n) in test_results.iteritems())
+      results_dict = dict((t.path, n) for (t, n) in test_results.items())
       with file("%s.%d.txt" % (dump_results_file, time.time()), "w") as f:
         f.write(json.dumps(results_dict))
 
     # Reset tests and redistribute the prototypes from the collection phase.
     s.tests = []
     if options.verbose:
-      print "Test distributions:"
+      print("Test distributions:")
     for t in test_backup[s]:
       max_deopt = test_results.get(t.path, 0)
       if max_deopt == 0:
@@ -467,7 +467,7 @@ def Execute(arch, mode, args, options, suites, workspace):
       n_deopt = CalculateNTests(max_deopt, options)
       distribution = dist.Distribute(n_deopt, max_deopt)
       if options.verbose:
-        print "%s %s" % (t.path, distribution)
+        print("%s %s" % (t.path, distribution))
       for i in distribution:
         fuzzing_flags = ["--deopt-every-n-times", "%d" % i]
         s.tests.append(t.CopyAddingFlags(t.variant, fuzzing_flags))
@@ -477,10 +477,10 @@ def Execute(arch, mode, args, options, suites, workspace):
       test_id += 1
 
   if num_tests == 0:
-    print "No tests to run."
+    print("No tests to run.")
     return 0
 
-  print(">>> Deopt fuzzing phase (%d test cases)" % num_tests)
+  print((">>> Deopt fuzzing phase (%d test cases)" % num_tests))
   progress_indicator = progress.PROGRESS_INDICATORS[options.progress]()
   runner = execution.Runner(suites, progress_indicator, ctx)
 

@@ -81,8 +81,8 @@ class DetectRevisionToRoll(Step):
         self["roll"] = revision
         break
     else:
-      print("There is no newer v8 revision than the one in Chromium (%s)."
-            % self["last_roll"])
+      print(("There is no newer v8 revision than the one in Chromium (%s)."
+            % self["last_roll"]))
       self['json_output']['monitoring_state'] = 'up_to_date'
       return True
 
@@ -160,9 +160,9 @@ class UploadCL(Step):
                      bypass_hooks=True,
                      cq=self._options.use_commit_queue,
                      cwd=cwd)
-      print "CL uploaded."
+      print("CL uploaded.")
     else:
-      print "Dry run - don't upload."
+      print("Dry run - don't upload.")
 
     self.GitCheckout("master", cwd=cwd)
     self.GitDeleteBranch("work-branch", cwd=cwd)
@@ -172,9 +172,9 @@ class CleanUp(Step):
 
   def RunStep(self):
     self['json_output']['monitoring_state'] = 'success'
-    print("Congratulations, you have successfully rolled %s into "
+    print(("Congratulations, you have successfully rolled %s into "
           "Chromium."
-          % self["roll"])
+          % self["roll"]))
 
     # Clean up all temporary files.
     Command("rm", "-f %s*" % self._config["PERSISTFILE_BASENAME"])
@@ -201,7 +201,7 @@ class AutoRoll(ScriptsBase):
 
   def _ProcessOptions(self, options):  # pragma: no cover
     if not options.author or not options.reviewer:
-      print "A reviewer (-r) and an author (-a) are required."
+      print("A reviewer (-r) and an author (-a) are required.")
       return False
 
     options.requires_editor = False

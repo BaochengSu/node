@@ -115,14 +115,14 @@ def isources(prefixes):
 
 def iflatten(obj):
   if isinstance(obj, dict):
-    for value in obj.values():
+    for value in list(obj.values()):
       for i in iflatten(value):
         yield i
   elif isinstance(obj, list):
     for value in obj:
       for i in iflatten(value):
         yield i
-  elif isinstance(obj, basestring):
+  elif isinstance(obj, str):
     yield path_no_prefix(os.path.join(*pathsplit(obj)), ALL_GYP_PREFIXES)
 
 
@@ -159,8 +159,7 @@ def missing_gyp_files():
     *[iflatten_gyp_file(gyp_file) for gyp_file in GYP_FILES]
     ))
   gyp_files = sorted(icheck_values(gyp_values, ALL_GYP_PREFIXES))
-  return filter(
-      lambda x: not any(i in x for i in GYP_UNSUPPORTED_FEATURES), gyp_files)
+  return [x for x in gyp_files if not any(i in x for i in GYP_UNSUPPORTED_FEATURES)]
 
 
 def missing_gn_files():
@@ -169,18 +168,17 @@ def missing_gn_files():
     ))
 
   gn_files = sorted(icheck_values(gn_values, ALL_GN_PREFIXES))
-  return filter(
-      lambda x: not any(i in x for i in GN_UNSUPPORTED_FEATURES), gn_files)
+  return [x for x in gn_files if not any(i in x for i in GN_UNSUPPORTED_FEATURES)]
 
 
 def main():
-  print "----------- Files not in gyp: ------------"
+  print("----------- Files not in gyp: ------------")
   for i in missing_gyp_files():
-    print i
+    print(i)
 
-  print "\n----------- Files not in gn: -------------"
+  print("\n----------- Files not in gn: -------------")
   for i in missing_gn_files():
-    print i
+    print(i)
   return 0
 
 if '__main__' == __name__:

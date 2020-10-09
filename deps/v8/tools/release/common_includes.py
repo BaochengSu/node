@@ -28,7 +28,7 @@
 
 import argparse
 import datetime
-import httplib
+import http.client
 import glob
 import imp
 import json
@@ -39,8 +39,8 @@ import subprocess
 import sys
 import textwrap
 import time
-import urllib
-import urllib2
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 
 from git_recipes import GitRecipesMixin
 from git_recipes import GitFailedException
@@ -97,7 +97,7 @@ def MakeComment(text):
 
 def StripComments(text):
   # Use split not splitlines to keep terminal newlines.
-  return "\n".join(filter(lambda x: not x.startswith("#"), text.split("\n")))
+  return "\n".join([x for x in text.split("\n") if not x.startswith("#")])
 
 
 def MakeChangeLogBody(commit_messages, auto_format=False):
@@ -154,11 +154,11 @@ def MakeChangeLogBugReference(body):
         if match: crbugs.append(int(match.group(1)))
 
   # Add issues to crbugs and v8bugs.
-  map(AddIssues, body.splitlines())
+  list(map(AddIssues, body.splitlines()))
 
   # Filter duplicates, sort, stringify.
-  crbugs = map(str, sorted(set(crbugs)))
-  v8bugs = map(str, sorted(set(v8bugs)))
+  crbugs = list(map(str, sorted(set(crbugs))))
+  v8bugs = list(map(str, sorted(set(v8bugs))))
 
   bug_groups = []
   def FormatIssues(prefix, bugs):
@@ -177,7 +177,7 @@ def MakeChangeLogBugReference(body):
 
 def SortingKey(version):
   """Key for sorting version number strings: '3.11' > '3.2.1.1'"""
-  version_keys = map(int, version.split("."))
+  version_keys = list(map(int, version.split(".")))
   # Fill up to full version numbers to normalize comparison.
   while len(version_keys) < 4:  # pragma: no cover
     version_keys.append(0)
@@ -191,8 +191,8 @@ def Command(cmd, args="", prefix="", pipe=True, cwd=None):
   cwd = cwd or os.getcwd()
   # TODO(machenbach): Use timeout.
   cmd_line = "%s %s %s" % (prefix, cmd, args)
-  print "Command: %s" % cmd_line
-  print "in %s" % cwd
+  print("Command: %s" % cmd_line)
+  print("in %s" % cwd)
   sys.stdout.flush()
   try:
     if pipe:
@@ -243,7 +243,7 @@ class SideEffectHandler(object):  # pragma: no cover
 
   def ReadURL(self, url, params=None):
     # pylint: disable=E1121
-    url_fh = urllib2.urlopen(url, params, 60)
+    url_fh = urllib.request.urlopen(url, params, 60)
     try:
       return url_fh.read()
     finally:
@@ -251,11 +251,11 @@ class SideEffectHandler(object):  # pragma: no cover
 
   def ReadClusterFuzzAPI(self, api_key, **params):
     params["api_key"] = api_key.strip()
-    params = urllib.urlencode(params)
+    params = urllib.parse.urlencode(params)
 
     headers = {"Content-type": "application/x-www-form-urlencoded"}
 
-    conn = httplib.HTTPSConnection("backend-dot-cluster-fuzz.appspot.com")
+    conn = http.client.HTTPSConnection("backend-dot-cluster-fuzz.appspot.com")
     conn.request("POST", "/_api/", params, headers)
 
     response = conn.getresponse()
@@ -264,8 +264,8 @@ class SideEffectHandler(object):  # pragma: no cover
     try:
       return json.loads(data)
     except:
-      print data
-      print "ERROR: Could not read response. Is your key valid?"
+      print(data)
+      print("ERROR: Could not read response. Is your key valid?")
       raise
 
   def Sleep(self, seconds):
@@ -338,11 +338,9 @@ class GitInterface(VCInterface):
 
   def GetBranches(self):
     # Get relevant remote branches, e.g. "branch-heads/3.25".
-    branches = filter(
-        lambda s: re.match(r"^branch\-heads/\d+\.\d+$", s),
-        self.step.GitRemotes())
+    branches = [s for s in self.step.GitRemotes() if re.match(r"^branch\-heads/\d+\.\d+$", s)]
     # Remove 'branch-heads/' prefix.
-    return map(lambda s: s[13:], branches)
+    return [s[13:] for s in branches]
 
   def MasterBranch(self):
     return "master"
@@ -387,8 +385,8 @@ class GitInterface(VCInterface):
       commit = self.step.GitLog(n=1, format="%H", grep=message, branch=remote)
       if commit:
         break
-      print("The commit has not replicated to git. Waiting for %s seconds." %
-            wait_interval)
+      print(("The commit has not replicated to git. Waiting for %s seconds." %
+            wait_interval))
       self.step._side_effect_handler.Sleep(wait_interval)
     else:
       self.step.Die("Couldn't determine commit for setting the tag. Maybe the "
@@ -440,7 +438,7 @@ class Step(GitRecipesMixin):
     if not self._state and os.path.exists(state_file):
       self._state.update(json.loads(FileToText(state_file)))
 
-    print ">>> Step %d: %s" % (self._number, self._text)
+    print(">>> Step %d: %s" % (self._number, self._text))
     try:
       return self.RunStep()
     finally:
@@ -476,16 +474,16 @@ class Step(GitRecipesMixin):
           raise Exception("Retried too often. Giving up. Reason: %s" %
                           str(got_exception))
         wait_time = wait_plan.pop()
-        print "Waiting for %f seconds." % wait_time
+        print("Waiting for %f seconds." % wait_time)
         self._side_effect_handler.Sleep(wait_time)
-        print "Retrying..."
+        print("Retrying...")
       else:
         return result
 
   def ReadLine(self, default=None):
     # Don't prompt in forced mode.
     if self._options.force_readline_defaults and default is not None:
-      print "%s (forced)" % default
+      print("%s (forced)" % default)
       return default
     else:
       return self._side_effect_handler.ReadLine()
@@ -521,8 +519,8 @@ class Step(GitRecipesMixin):
 
   def Die(self, msg=""):
     if msg != "":
-      print "Error: %s" % msg
-    print "Exiting"
+      print("Error: %s" % msg)
+    print("Exiting")
     raise Exception(msg)
 
   def DieNoManualMode(self, msg=""):
@@ -531,7 +529,7 @@ class Step(GitRecipesMixin):
       self.Die(msg)
 
   def Confirm(self, msg):
-    print "%s [Y/n] " % msg,
+    print("%s [Y/n] " % msg, end=' ')
     answer = self.ReadLine(default="Y")
     return answer == "" or answer == "Y" or answer == "y"
 
@@ -541,7 +539,7 @@ class Step(GitRecipesMixin):
         msg = "Branch %s exists, do you want to delete it?" % name
         if self.Confirm(msg):
           self.GitDeleteBranch(name, cwd=cwd)
-          print "Branch %s deleted." % name
+          print("Branch %s deleted." % name)
         else:
           msg = "Can't continue. Please delete branch %s and try again." % name
           self.Die(msg)
@@ -604,23 +602,23 @@ class Step(GitRecipesMixin):
            "change the headline of the uploaded CL.")
     answer = ""
     while answer != "LGTM":
-      print "> ",
+      print("> ", end=' ')
       answer = self.ReadLine(None if self._options.wait_for_lgtm else "LGTM")
       if answer != "LGTM":
-        print "That was not 'LGTM'."
+        print("That was not 'LGTM'.")
 
   def WaitForResolvingConflicts(self, patch_file):
-    print("Applying the patch \"%s\" failed. Either type \"ABORT<Return>\", "
+    print(("Applying the patch \"%s\" failed. Either type \"ABORT<Return>\", "
           "or resolve the conflicts, stage *all* touched files with "
-          "'git add', and type \"RESOLVED<Return>\"" % (patch_file))
+          "'git add', and type \"RESOLVED<Return>\"" % (patch_file)))
     self.DieNoManualMode()
     answer = ""
     while answer != "RESOLVED":
       if answer == "ABORT":
         self.Die("Applying the patch failed.")
       if answer != "":
-        print "That was not 'RESOLVED' or 'ABORT'."
-      print "> ",
+        print("That was not 'RESOLVED' or 'ABORT'.")
+      print("> ", end=' ')
       answer = self.ReadLine()
 
   # Takes a file containing the patch to apply as first argument.
@@ -646,7 +644,7 @@ class Step(GitRecipesMixin):
                          int(time_now - max_age)).strip()
 
     # Filter out revisions who's tag is off by one or more commits.
-    return filter(lambda r: self.GetVersionTag(r), revisions.splitlines())
+    return [r for r in revisions.splitlines() if self.GetVersionTag(r)]
 
   def GetLatestVersion(self):
     # Use cached version if available.
@@ -760,10 +758,10 @@ class UploadStep(Step):
 
   def RunStep(self):
     if self._options.reviewer:
-      print "Using account %s for review." % self._options.reviewer
+      print("Using account %s for review." % self._options.reviewer)
       reviewer = self._options.reviewer
     else:
-      print "Please enter the email address of a V8 reviewer for your patch: ",
+      print("Please enter the email address of a V8 reviewer for your patch: ", end=' ')
       self.DieNoManualMode("A reviewer must be specified in forced mode.")
       reviewer = self.ReadLine()
     self.GitUpload(reviewer, self._options.author, self._options.force_upload,
@@ -836,7 +834,7 @@ class ScriptsBase(object):
 
     # Process common options.
     if options.step < 0:  # pragma: no cover
-      print "Bad step number %d" % options.step
+      print("Bad step number %d" % options.step)
       parser.print_help()
       return None
 

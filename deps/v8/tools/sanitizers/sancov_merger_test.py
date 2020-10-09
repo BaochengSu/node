@@ -74,9 +74,9 @@ class MergerTests(unittest.TestCase):
   def test_generate_inputs_2_cpu(self):
     inputs = sancov_merger.generate_inputs(
         False, '/some/path', FILE_MAP, 2)
-    self.assertEquals(EXPECTED_INPUTS_2, inputs)
+    self.assertEqual(EXPECTED_INPUTS_2, inputs)
 
   def test_generate_inputs_4_cpu(self):
     inputs = sancov_merger.generate_inputs(
         True, '/some/path', FILE_MAP, 4)
-    self.assertEquals(EXPECTED_INPUTS_4, inputs)
+    self.assertEqual(EXPECTED_INPUTS_4, inputs)

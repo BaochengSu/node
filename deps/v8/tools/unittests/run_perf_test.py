@@ -101,8 +101,8 @@ class PerfTest(unittest.TestCase):
   @classmethod
   def tearDownClass(cls):
     cls._cov.stop()
-    print ""
-    print cls._cov.report()
+    print("")
+    print(cls._cov.report())
 
   def setUp(self):
     self.maxDiff = None
@@ -132,7 +132,7 @@ class PerfTest(unittest.TestCase):
     # Check that d8 is called from the correct cwd for each test run.
     dirs = [path.join(TEST_WORKSPACE, arg) for arg in args[0]]
     def chdir(*args, **kwargs):
-      self.assertEquals(dirs.pop(), args[0])
+      self.assertEqual(dirs.pop(), args[0])
     os.chdir = MagicMock(side_effect=chdir)
 
     subprocess.check_call = MagicMock()
@@ -153,7 +153,7 @@ class PerfTest(unittest.TestCase):
       return json.load(f)
 
   def _VerifyResults(self, suite, units, traces, file_name=None):
-    self.assertEquals([
+    self.assertEqual([
       {"units": units,
        "graphs": [suite, trace["name"]],
        "results": trace["results"],
@@ -161,7 +161,7 @@ class PerfTest(unittest.TestCase):
       self._LoadResults(file_name)["traces"])
 
   def _VerifyErrors(self, errors):
-    self.assertEquals(errors, self._LoadResults()["errors"])
+    self.assertEqual(errors, self._LoadResults()["errors"])
 
   def _VerifyMock(self, binary, *args, **kwargs):
     arg = [path.join(path.dirname(self.base), binary)]
@@ -175,12 +175,12 @@ class PerfTest(unittest.TestCase):
       a = [path.join(path.dirname(self.base), arg[0])]
       a += arg[1:]
       expected.append(((a,), {"timeout": kwargs.get("timeout", 60)}))
-    self.assertEquals(expected, commands.Execute.call_args_list)
+    self.assertEqual(expected, commands.Execute.call_args_list)
 
   def testOneRun(self):
     self._WriteTestInput(V8_JSON)
     self._MockCommand(["."], ["x\nRichards: 1.234\nDeltaBlue: 10657567\ny\n"])
-    self.assertEquals(0, self._CallMain())
+    self.assertEqual(0, self._CallMain())
     self._VerifyResults("test", "score", [
       {"name": "Richards", "results": ["1.234"], "stddev": ""},
       {"name": "DeltaBlue", "results": ["10657567.0"], "stddev": ""},
@@ -193,7 +193,7 @@ class PerfTest(unittest.TestCase):
     test_input["test_flags"] = ["2", "test_name"]
     self._WriteTestInput(test_input)
     self._MockCommand(["."], ["Richards: 1.234\nDeltaBlue: 10657567"])
-    self.assertEquals(0, self._CallMain())
+    self.assertEqual(0, self._CallMain())
     self._VerifyResults("test", "score", [
       {"name": "Richards", "results": ["1.234"], "stddev": ""},
       {"name": "DeltaBlue", "results": ["10657567.0"], "stddev": ""},
@@ -211,7 +211,7 @@ class PerfTest(unittest.TestCase):
     self._MockCommand([".", "."],
                       ["Richards: 100\nDeltaBlue: 200\n",
                        "Richards: 50\nDeltaBlue: 300\n"])
-    self.assertEquals(0, self._CallMain())
+    self.assertEqual(0, self._CallMain())
     self._VerifyResults("v8", "ms", [
       {"name": "Richards", "results": ["50.0", "100.0"], "stddev": ""},
       {"name": "DeltaBlue", "results": ["300.0", "200.0"], "stddev": ""},
@@ -229,7 +229,7 @@ class PerfTest(unittest.TestCase):
     self._MockCommand([".", "."],
                       ["Richards: 100\nDeltaBlue: 200\n",
                        "Richards: 50\nDeltaBlue: 300\n"])
-    self.assertEquals(0, self._CallMain())
+    self.assertEqual(0, self._CallMain())
     self._VerifyResults("test", "score", [
       {"name": "Richards", "results": ["50.0", "100.0"], "stddev": ""},
       {"name": "DeltaBlue", "results": ["300.0", "200.0"], "stddev": ""},
@@ -246,8 +246,8 @@ class PerfTest(unittest.TestCase):
                        "Simple: 3 ms.\n",
                        "Richards: 100\n",
                        "Richards: 50\n"])
-    self.assertEquals(0, self._CallMain())
-    self.assertEquals([
+    self.assertEqual(0, self._CallMain())
+    self.assertEqual([
       {"units": "score",
        "graphs": ["test", "Richards"],
        "results": ["50.0", "100.0"],
@@ -276,7 +276,7 @@ class PerfTest(unittest.TestCase):
     self._WriteTestInput(test_input)
     self._MockCommand(["."], ["Richards: 1.234\nRichards-stddev: 0.23\n"
                               "DeltaBlue: 10657567\nDeltaBlue-stddev: 106\n"])
-    self.assertEquals(0, self._CallMain())
+    self.assertEqual(0, self._CallMain())
     self._VerifyResults("test", "score", [
       {"name": "Richards", "results": ["1.234"], "stddev": "0.23"},
       {"name": "DeltaBlue", "results": ["10657567.0"], "stddev": "106"},
@@ -293,7 +293,7 @@ class PerfTest(unittest.TestCase):
                               "DeltaBlue: 6\nDeltaBlue-boom: 0.9\n",
                               "Richards: 2\nRichards-stddev: 0.5\n"
                               "DeltaBlue: 5\nDeltaBlue-stddev: 0.8\n"])
-    self.assertEquals(1, self._CallMain())
+    self.assertEqual(1, self._CallMain())
     self._VerifyResults("test", "score", [
       {"name": "Richards", "results": ["2.0", "3.0"], "stddev": "0.7"},
       {"name": "DeltaBlue", "results": ["5.0", "6.0"], "stddev": "0.8"},
@@ -310,7 +310,7 @@ class PerfTest(unittest.TestCase):
   def testBuildbot(self):
     self._WriteTestInput(V8_JSON)
     self._MockCommand(["."], ["Richards: 1.234\nDeltaBlue: 10657567\n"])
-    self.assertEquals(0, self._CallMain("--buildbot"))
+    self.assertEqual(0, self._CallMain("--buildbot"))
     self._VerifyResults("test", "score", [
       {"name": "Richards", "results": ["1.234"], "stddev": ""},
       {"name": "DeltaBlue", "results": ["10657567.0"], "stddev": ""},
@@ -323,7 +323,7 @@ class PerfTest(unittest.TestCase):
     test_input["total"] = True
     self._WriteTestInput(test_input)
     self._MockCommand(["."], ["Richards: 1.234\nDeltaBlue: 10657567\n"])
-    self.assertEquals(0, self._CallMain("--buildbot"))
+    self.assertEqual(0, self._CallMain("--buildbot"))
     self._VerifyResults("test", "score", [
       {"name": "Richards", "results": ["1.234"], "stddev": ""},
       {"name": "DeltaBlue", "results": ["10657567.0"], "stddev": ""},
@@ -337,7 +337,7 @@ class PerfTest(unittest.TestCase):
     test_input["total"] = True
     self._WriteTestInput(test_input)
     self._MockCommand(["."], ["x\nRichards: bla\nDeltaBlue: 10657567\ny\n"])
-    self.assertEquals(1, self._CallMain("--buildbot"))
+    self.assertEqual(1, self._CallMain("--buildbot"))
     self._VerifyResults("test", "score", [
       {"name": "Richards", "results": [], "stddev": ""},
       {"name": "DeltaBlue", "results": ["10657567.0"], "stddev": ""},
@@ -351,7 +351,7 @@ class PerfTest(unittest.TestCase):
   def testRegexpNoMatch(self):
     self._WriteTestInput(V8_JSON)
     self._MockCommand(["."], ["x\nRichaards: 1.234\nDeltaBlue: 10657567\ny\n"])
-    self.assertEquals(1, self._CallMain())
+    self.assertEqual(1, self._CallMain())
     self._VerifyResults("test", "score", [
       {"name": "Richards", "results": [], "stddev": ""},
       {"name": "DeltaBlue", "results": ["10657567.0"], "stddev": ""},
@@ -368,8 +368,8 @@ class PerfTest(unittest.TestCase):
       "RESULT Infra: Constant2= [10,5,10,15] count\n"
       "RESULT Infra: Constant3= {12,1.2} count\n"
       "RESULT Infra: Constant4= [10,5,error,15] count\n"])
-    self.assertEquals(1, self._CallMain())
-    self.assertEquals([
+    self.assertEqual(1, self._CallMain())
+    self.assertEqual([
       {"units": "count",
        "graphs": ["test", "Infra", "Constant1"],
        "results": ["11.0"],
@@ -395,7 +395,7 @@ class PerfTest(unittest.TestCase):
     test_input["timeout"] = 70
     self._WriteTestInput(test_input)
     self._MockCommand(["."], [""], timed_out=True)
-    self.assertEquals(1, self._CallMain())
+    self.assertEqual(1, self._CallMain())
     self._VerifyResults("test", "score", [
       {"name": "Richards", "results": [], "stddev": ""},
       {"name": "DeltaBlue", "results": [], "stddev": ""},
@@ -419,7 +419,7 @@ class PerfTest(unittest.TestCase):
     platform.Run = MagicMock(
         return_value=("Richards: 1.234\nDeltaBlue: 10657567\n", None))
     run_perf.AndroidPlatform = MagicMock(return_value=platform)
-    self.assertEquals(
+    self.assertEqual(
         0, self._CallMain("--android-build-tools", "/some/dir",
                           "--arch", "arm"))
     self._VerifyResults("test", "score", [
@@ -437,7 +437,7 @@ class PerfTest(unittest.TestCase):
                        "Richards: 50\nDeltaBlue: 200\n",
                        "Richards: 100\nDeltaBlue: 20\n"])
     test_output_no_patch = path.join(TEST_WORKSPACE, "results_no_patch.json")
-    self.assertEquals(0, self._CallMain(
+    self.assertEqual(0, self._CallMain(
         "--outdir-no-patch", "out-no-patch",
         "--json-test-results-no-patch", test_output_no_patch,
     ))
@@ -461,7 +461,7 @@ class PerfTest(unittest.TestCase):
     test_input = dict(V8_JSON)
     self._WriteTestInput(test_input)
     self._MockCommand(["."], ["x\nRichards: 1.234\nDeltaBlue: 10657567\ny\n"])
-    self.assertEquals(0, self._CallMain("--extra-flags=--prof"))
+    self.assertEqual(0, self._CallMain("--extra-flags=--prof"))
     self._VerifyResults("test", "score", [
       {"name": "Richards", "results": ["1.234"], "stddev": ""},
       {"name": "DeltaBlue", "results": ["10657567.0"], "stddev": ""},
@@ -475,8 +475,8 @@ class PerfTest(unittest.TestCase):
       for i in [1, 2, 3]:
         yield i, i + 1
     l, r = run_perf.Unzip(Gen())
-    self.assertEquals([1, 2, 3], list(l()))
-    self.assertEquals([2, 3, 4], list(r()))
+    self.assertEqual([1, 2, 3], list(l()))
+    self.assertEqual([2, 3, 4], list(r()))
 
   #############################################################################
   ### System tests
@@ -494,54 +494,54 @@ class PerfTest(unittest.TestCase):
 
   def testNormal(self):
     results = self._RunPerf("d8_mocked1.py", "test1.json")
-    self.assertEquals([], results['errors'])
-    self.assertEquals([
+    self.assertEqual([], results['errors'])
+    self.assertEqual([
       {
         'units': 'score',
         'graphs': ['test1', 'Richards'],
-        'results': [u'1.2', u'1.2'],
+        'results': ['1.2', '1.2'],
         'stddev': '',
       },
       {
         'units': 'score',
         'graphs': ['test1', 'DeltaBlue'],
-        'results': [u'2.1', u'2.1'],
+        'results': ['2.1', '2.1'],
         'stddev': '',
       },
     ], results['traces'])
 
   def testResultsProcessor(self):
     results = self._RunPerf("d8_mocked2.py", "test2.json")
-    self.assertEquals([], results['errors'])
-    self.assertEquals([
+    self.assertEqual([], results['errors'])
+    self.assertEqual([
       {
         'units': 'score',
         'graphs': ['test2', 'Richards'],
-        'results': [u'1.2', u'1.2'],
+        'results': ['1.2', '1.2'],
         'stddev': '',
       },
       {
         'units': 'score',
         'graphs': ['test2', 'DeltaBlue'],
-        'results': [u'2.1', u'2.1'],
+        'results': ['2.1', '2.1'],
         'stddev': '',
       },
     ], results['traces'])
 
   def testResultsProcessorNested(self):
     results = self._RunPerf("d8_mocked2.py", "test3.json")
-    self.assertEquals([], results['errors'])
-    self.assertEquals([
+    self.assertEqual([], results['errors'])
+    self.assertEqual([
       {
         'units': 'score',
         'graphs': ['test3', 'Octane', 'Richards'],
-        'results': [u'1.2'],
+        'results': ['1.2'],
         'stddev': '',
       },
       {
         'units': 'score',
         'graphs': ['test3', 'Octane', 'DeltaBlue'],
-        'results': [u'2.1'],
+        'results': ['2.1'],
         'stddev': '',
       },
     ], results['traces'])

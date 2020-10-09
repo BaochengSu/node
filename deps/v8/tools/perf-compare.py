@@ -12,7 +12,7 @@ Examples:
 '''
 
 from collections import OrderedDict
-import commands
+import subprocess
 import json
 import math
 from argparse import ArgumentParser
@@ -32,7 +32,7 @@ class Statistics:
 
   @staticmethod
   def Variance(values, average):
-    return map(lambda x: (x - average) ** 2, values)
+    return [(x - average) ** 2 for x in values]
 
   @staticmethod
   def StandardDeviation(values, average):
@@ -100,7 +100,7 @@ class BenchmarkResult:
 
   def Compare(self, other):
     if self.units_ != other.units_:
-      print ("Incompatible units: %s and %s" % (self.units_, other.units_))
+      print(("Incompatible units: %s and %s" % (self.units_, other.units_)))
       sys.exit(1)
 
     significant = False
@@ -143,7 +143,7 @@ class Benchmark:
     return self.runs_.get(run_name)
 
   def appendResult(self, run_name, trace):
-    values = map(float, trace['results'])
+    values = list(map(float, trace['results']))
     count = len(values)
     mean = Statistics.Mean(values)
     stddev = float(trace.get('stddev') or
@@ -159,7 +159,7 @@ class BenchmarkSuite:
     self.benchmarks_ = {}
 
   def SortedTestKeys(self):
-    keys = self.benchmarks_.keys()
+    keys = list(self.benchmarks_.keys())
     keys.sort()
     t = "Total"
     if t in keys:
@@ -412,14 +412,14 @@ def Render(args):
       filenames = json_file_list[1:]
 
     for filename in filenames:
-      print ("Processing result set \"%s\", file: %s" % (run_name, filename))
+      print(("Processing result set \"%s\", file: %s" % (run_name, filename)))
       with open(filename) as json_data:
         data = json.load(json_data)
 
       run_names[run_name] = 0
 
       for error in data["errors"]:
-        print "Error:", error
+        print("Error:", error)
 
       for trace in data["traces"]:
         suite_name = trace["graphs"][0]
@@ -439,11 +439,11 @@ def Render(args):
 
   title = args.title or "Benchmark results"
   renderer.StartTOC(title)
-  for suite_name, benchmark_suite_object in sorted(benchmark_suites.iteritems()):
+  for suite_name, benchmark_suite_object in sorted(benchmark_suites.items()):
     renderer.PrintBenchmarkLink(suite_name)
   renderer.FinishTOC()
 
-  for suite_name, benchmark_suite_object in sorted(benchmark_suites.iteritems()):
+  for suite_name, benchmark_suite_object in sorted(benchmark_suites.items()):
     renderer.StartSuite(suite_name, run_names)
     for benchmark_name in benchmark_suite_object.SortedTestKeys():
       benchmark_object = benchmark_suite_object.getBenchmark(benchmark_name)

@@ -14,7 +14,7 @@ for sets of canned configurations and analyze them.
 # workaround https://crbug.com/736215 for CL
 # https://codereview.chromium.org/2974603002/
 
-from __future__ import print_function
+
 
 import argparse
 import ast
@@ -29,7 +29,7 @@ import sys
 import subprocess
 import tempfile
 import traceback
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 from collections import OrderedDict
 
@@ -285,7 +285,7 @@ class MetaBuildWrapper(object):
   def CmdExport(self):
     self.ReadConfigFile()
     obj = {}
-    for master, builders in self.masters.items():
+    for master, builders in list(self.masters.items()):
       obj[master] = {}
       for builder in builders:
         config = self.masters[master][builder]
@@ -294,7 +294,7 @@ class MetaBuildWrapper(object):
 
         if isinstance(config, dict):
           args = {k: self.FlattenConfig(v)['gn_args']
-                  for k, v in config.items()}
+                  for k, v in list(config.items())}
         elif config.startswith('//'):
           args = config
         else:
@@ -410,15 +410,15 @@ class MetaBuildWrapper(object):
     # Build a list of all of the configs referenced by builders.
     all_configs = {}
     for master in self.masters:
-      for config in self.masters[master].values():
+      for config in list(self.masters[master].values()):
         if isinstance(config, dict):
-          for c in config.values():
+          for c in list(config.values()):
             all_configs[c] = master
         else:
           all_configs[config] = master
 
     # Check that every referenced args file or config actually exists.
-    for config, loc in all_configs.items():
+    for config, loc in list(all_configs.items()):
       if config.startswith('//'):
         if not self.Exists(self.ToAbsPath(config)):
           errs.append('Unknown args file "%s" referenced from "%s".' %
@@ -435,7 +435,7 @@ class MetaBuildWrapper(object):
     # Figure out the whole list of mixins, and check that every mixin
     # listed by a config or another mixin actually exists.
     referenced_mixins = set()
-    for config, mixins in self.configs.items():
+    for config, mixins in list(self.configs.items()):
       for mixin in mixins:
         if not mixin in self.mixins:
           errs.append('Unknown mixin "%s" referenced by config "%s".' %
@@ -541,7 +541,7 @@ class MetaBuildWrapper(object):
         if config == 'tbd':
           tbd.add(builder)
         elif isinstance(config, dict):
-          vals = self.FlattenConfig(config.values()[0])
+          vals = self.FlattenConfig(list(config.values())[0])
           if vals['type'] == 'gyp':
             gyp.add(builder)
           else:
@@ -573,9 +573,9 @@ class MetaBuildWrapper(object):
       self.Print('')
 
     fmt = '{:<27} {:>4}'
-    self.Print(fmt.format('Totals', str(sum(int(v) for v in stats.values()))))
+    self.Print(fmt.format('Totals', str(sum(int(v) for v in list(stats.values())))))
     self.Print(fmt.format('-' * 27, '----'))
-    for stat, count in stats.items():
+    for stat, count in list(stats.items()):
       self.Print(fmt.format(stat, str(count)))
 
     return 0
@@ -662,7 +662,7 @@ class MetaBuildWrapper(object):
     contents = json.loads(self.ReadFile(path))
     gyp_vals = contents.get('GYP_DEFINES', {})
     if isinstance(gyp_vals, dict):
-      gyp_defines = ' '.join('%s=%s' % (k, v) for k, v in gyp_vals.items())
+      gyp_defines = ' '.join('%s=%s' % (k, v) for k, v in list(gyp_vals.items()))
     else:
       gyp_defines = ' '.join(gyp_vals)
     gn_args = ' '.join(contents.get('gn_args', []))
@@ -1314,14 +1314,14 @@ class MetaBuildWrapper(object):
 
   def CheckCompile(self, master, builder):
     url_template = self.args.url_template + '/{builder}/builds/_all?as_text=1'
-    url = urllib2.quote(url_template.format(master=master, builder=builder),
+    url = urllib.parse.quote(url_template.format(master=master, builder=builder),
                         safe=':/()?=')
     try:
       builds = json.loads(self.Fetch(url))
     except Exception as e:
       return str(e)
     successes = sorted(
-        [int(x) for x in builds.keys() if "text" in builds[x] and
+        [int(x) for x in list(builds.keys()) if "text" in builds[x] and
           cmp(builds[x]["text"][:2], ["build", "successful"]) == 0],
         reverse=True)
     if not successes:
@@ -1408,7 +1408,7 @@ class MetaBuildWrapper(object):
 
   def Fetch(self, url):
     # This function largely exists so it can be overridden for testing.
-    f = urllib2.urlopen(url)
+    f = urllib.request.urlopen(url)
     contents = f.read()
     f.close()
     return contents
@@ -1416,7 +1416,7 @@ class MetaBuildWrapper(object):
   def MaybeMakeDirectory(self, path):
     try:
       os.makedirs(path)
-    except OSError, e:
+    except OSError as e:
       if e.errno != errno.EEXIST:
         raise
 

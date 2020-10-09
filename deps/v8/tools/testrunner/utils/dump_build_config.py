@@ -23,4 +23,4 @@ def as_json(kv):
   return k, json.loads(v)
 
 with open(sys.argv[1], 'w') as f:
-  json.dump(dict(map(as_json, sys.argv[2:])), f)
+  json.dump(dict(list(map(as_json, sys.argv[2:]))), f)

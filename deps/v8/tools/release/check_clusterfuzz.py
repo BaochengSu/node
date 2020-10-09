@@ -15,13 +15,13 @@ suppress stdout and stderr and only process contents of the results_file.
 
 
 import argparse
-import httplib
+import http.client
 import json
 import os
 import re
 import sys
-import urllib
-import urllib2
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 
 
 # Constants to git repos.
@@ -118,7 +118,7 @@ BUG_SPECS = [
 
 
 def GetRequest(url):
-  url_fh = urllib2.urlopen(url, None, 60)
+  url_fh = urllib.request.urlopen(url, None, 60)
   try:
     return url_fh.read()
   finally:
@@ -163,12 +163,12 @@ def APIRequest(key, **params):
   """
 
   params["api_key"] = key
-  params = urllib.urlencode(params)
+  params = urllib.parse.urlencode(params)
 
   headers = {"Content-type": "application/x-www-form-urlencoded"}
 
   try:
-    conn = httplib.HTTPSConnection(HOSTNAME)
+    conn = http.client.HTTPSConnection(HOSTNAME)
     conn.request("POST", "/_api/", params, headers)
 
     response = conn.getresponse()
@@ -221,7 +221,7 @@ def Main():
     with open(options.results_file, "w") as f:
       f.write(json.dumps(results))
   else:
-    print results
+    print(results)
 
 
 if __name__ == "__main__":

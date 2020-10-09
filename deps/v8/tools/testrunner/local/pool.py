@@ -3,7 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from Queue import Empty
+from queue import Empty
 from multiprocessing import Event, Process, Queue
 import traceback
 
@@ -55,9 +55,9 @@ def Worker(fn, work_queue, done_queue, done,
         break
       try:
         done_queue.put(NormalResult(fn(*args, **kwargs)))
-      except Exception, e:
+      except Exception as e:
         traceback.print_exc()
-        print(">>> EXCEPTION: %s" % e)
+        print((">>> EXCEPTION: %s" % e))
         done_queue.put(ExceptionResult())
   except KeyboardInterrupt:
     done_queue.put(BreakResult())
@@ -113,7 +113,7 @@ class Pool():
       gen = iter(gen)
       self.advance = self._advance_more
 
-      for w in xrange(self.num_workers):
+      for w in range(self.num_workers):
         p = Process(target=Worker, args=(fn,
                                          self.work_queue,
                                          self.done_queue,
@@ -153,7 +153,7 @@ class Pool():
   def _advance_more(self, gen):
     while self.count < self.num_workers * self.BUFFER_FACTOR:
       try:
-        self.work_queue.put(gen.next())
+        self.work_queue.put(next(gen))
         self.count += 1
       except StopIteration:
         self.advance = self._advance_empty

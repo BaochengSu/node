@@ -65,7 +65,7 @@ def SetEnvironmentAndGetRuntimeDllDirs():
     gyp_defines_dict = gyp.NameValueListToDict(gyp.ShlexEnv('GYP_DEFINES'))
     gyp_defines_dict['windows_sdk_path'] = win_sdk
     os.environ['GYP_DEFINES'] = ' '.join('%s=%s' % (k, pipes.quote(str(v)))
-        for k, v in gyp_defines_dict.iteritems())
+        for k, v in gyp_defines_dict.items())
     os.environ['WINDOWSSDKDIR'] = win_sdk
     os.environ['WDK_DIR'] = wdk
     # Include the VS runtime in the PATH in case it's not machine-installed.
@@ -90,12 +90,12 @@ def _RegistryGetValueUsingWinReg(key, value):
     contents of the registry key's value, or None on failure.  Throws
     ImportError if _winreg is unavailable.
   """
-  import _winreg
+  import winreg
   try:
     root, subkey = key.split('\\', 1)
     assert root == 'HKLM'  # Only need HKLM for now.
-    with _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, subkey) as hkey:
-      return _winreg.QueryValueEx(hkey, value)[0]
+    with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, subkey) as hkey:
+      return winreg.QueryValueEx(hkey, value)[0]
   except WindowsError:
     return None
 
@@ -127,7 +127,7 @@ def DetectVisualStudioPath():
   if version_as_year not in year_to_version:
     raise Exception(('Visual Studio version %s (from GYP_MSVS_VERSION)'
                      ' not supported. Supported versions are: %s') % (
-                       version_as_year, ', '.join(year_to_version.keys())))
+                       version_as_year, ', '.join(list(year_to_version.keys()))))
   version = year_to_version[version_as_year]
   keys = [r'HKLM\Software\Microsoft\VisualStudio\%s' % version,
           r'HKLM\Software\Wow6432Node\Microsoft\VisualStudio\%s' % version]
@@ -162,7 +162,7 @@ def _CopyRuntimeImpl(target, source, verbose=True):
       (not os.path.isfile(target) or
       os.stat(target).st_mtime != os.stat(source).st_mtime)):
     if verbose:
-      print 'Copying %s to %s...' % (source, target)
+      print('Copying %s to %s...' % (source, target))
     if os.path.exists(target):
       os.unlink(target)
     shutil.copy2(source, target)
@@ -187,7 +187,7 @@ def _CopyRuntime2015(target_dir, source_dir, dll_pattern, suffix):
     source = os.path.join(source_dir, dll)
     _CopyRuntimeImpl(target, source)
   ucrt_src_dir = os.path.join(source_dir, 'api-ms-win-*.dll')
-  print 'Copying %s to %s...' % (ucrt_src_dir, target_dir)
+  print('Copying %s to %s...' % (ucrt_src_dir, target_dir))
   for ucrt_src_file in glob.glob(ucrt_src_dir):
     file_part = os.path.basename(ucrt_src_file)
     ucrt_dst_file = os.path.join(target_dir, file_part)
@@ -297,7 +297,7 @@ def Update(force=False):
   information required to pass to gyp which we use in |GetToolchainDir()|.
   """
   if force != False and force != '--force':
-    print >>sys.stderr, 'Unknown parameter "%s"' % force
+    print('Unknown parameter "%s"' % force, file=sys.stderr)
     return 1
   if force == '--force' or os.path.exists(json_data_file):
     force = True
@@ -342,7 +342,7 @@ def GetToolchainDir():
     if os.path.isdir(default_sdk_path):
       os.environ['WINDOWSSDKDIR'] = default_sdk_path
 
-  print '''vs_path = "%s"
+  print('''vs_path = "%s"
 sdk_path = "%s"
 vs_version = "%s"
 wdk_dir = "%s"
@@ -352,7 +352,7 @@ runtime_dirs = "%s"
       NormalizePath(os.environ['WINDOWSSDKDIR']),
       GetVisualStudioVersion(),
       NormalizePath(os.environ.get('WDK_DIR', '')),
-      os.path.pathsep.join(runtime_dll_dirs or ['None']))
+      os.path.pathsep.join(runtime_dll_dirs or ['None'])))
 
 
 def main():
@@ -362,7 +362,7 @@ def main():
       'copy_dlls': CopyDlls,
   }
   if len(sys.argv) < 2 or sys.argv[1] not in commands:
-    print >>sys.stderr, 'Expected one of: %s' % ', '.join(commands)
+    print('Expected one of: %s' % ', '.join(commands), file=sys.stderr)
     return 1
   return commands[sys.argv[1]](*sys.argv[2:])
 

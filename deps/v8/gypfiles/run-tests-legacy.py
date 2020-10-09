@@ -34,11 +34,9 @@ def main():
   arch = (args.arch or 'ia32,x64,arm').split(',')
   mode = (args.mode or 'release,debug').split(',')
   if args.arch_and_mode:
-    arch_and_mode = map(
-        lambda am: am.split('.'),
-        args.arch_and_mode.split(','))
-    arch = map(lambda am: am[0], arch_and_mode)
-    mode = map(lambda am: am[1], arch_and_mode)
+    arch_and_mode = [am.split('.') for am in args.arch_and_mode.split(',')]
+    arch = [am[0] for am in arch_and_mode]
+    mode = [am[1] for am in arch_and_mode]
 
   ret_code = 0
   for a, m in itertools.product(arch, mode):

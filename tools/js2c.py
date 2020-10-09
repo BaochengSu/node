@@ -34,8 +34,6 @@
 import os
 import re
 import sys
-import string
-
 
 def ToCArray(elements, step=10):
   slices = (elements[i:i+step] for i in range(0, len(elements), step))
@@ -148,14 +146,14 @@ def ReadMacros(lines):
       macro_match = MACRO_PATTERN.match(line)
       if macro_match:
         name = macro_match.group(1)
-        args = list(map(string.strip, macro_match.group(2).split(',')))
+        args = [x.strip() for x in macro_match.group(2).split(',')]
         body = macro_match.group(3).strip()
         macros[name] = TextMacro(args, body)
       else:
         python_match = PYTHON_MACRO_PATTERN.match(line)
         if python_match:
           name = python_match.group(1)
-          args = list(map(string.strip, python_match.group(2).split(',')))
+          args = [x.strip() for x in python_match.group(2).split(',')]
           body = python_match.group(3).strip()
           fun = eval("lambda " + ",".join(args) + ': ' + body)
           macros[name] = PythonMacro(args, fun)

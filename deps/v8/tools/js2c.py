@@ -35,7 +35,7 @@ import os, re
 import optparse
 import jsmin
 import textwrap
-from functools import reduce
+from functools import reduce, cmp_to_key
 
 
 class Error(Exception):
@@ -407,8 +407,8 @@ def PrepareSources(source_files, native_type, emit_js):
     filters = BuildFilterChain(macro_file, message_template_file)
 
   # Sort 'debugger' sources first.
-  source_files = sorted(source_files,
-                        lambda l,r: IsDebuggerFile(r) - IsDebuggerFile(l))
+  source_files = sorted(source_files, 
+    key=cmp_to_key(lambda l,r: IsDebuggerFile(r) - IsDebuggerFile(l)))
 
   source_files_and_contents = [(f, ReadFile(f)) for f in source_files]
 
@@ -505,13 +505,13 @@ def PutInt(blob_file, value):
   byte_sequence = bytearray()
   for i in range(size):
     byte_sequence.append(value_with_length & 255)
-    value_with_length >>= 8;
+    value_with_length >>= 8
   blob_file.write(byte_sequence)
 
 
 def PutStr(blob_file, value):
-  PutInt(blob_file, len(value));
-  blob_file.write(value);
+  PutInt(blob_file, len(value))
+  blob_file.write(value.encode('utf-8'))
 
 
 def WriteStartupBlob(sources, startup_blob):
@@ -524,16 +524,16 @@ def WriteStartupBlob(sources, startup_blob):
   """
   output = open(startup_blob, "wb")
 
-  debug_sources = sum(sources.is_debugger_id);
+  debug_sources = sum(sources.is_debugger_id)
   PutInt(output, debug_sources)
   for i in range(debug_sources):
-    PutStr(output, sources.names[i]);
-    PutStr(output, sources.modules[i]);
+    PutStr(output, sources.names[i])
+    PutStr(output, sources.modules[i])
 
   PutInt(output, len(sources.names) - debug_sources)
   for i in range(debug_sources, len(sources.names)):
-    PutStr(output, sources.names[i]);
-    PutStr(output, sources.modules[i]);
+    PutStr(output, sources.names[i])
+    PutStr(output, sources.modules[i])
 
   output.close()
 

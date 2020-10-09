@@ -38,13 +38,13 @@ import string
 
 
 def ToCArray(elements, step=10):
-  slices = (elements[i:i+step] for i in xrange(0, len(elements), step))
-  slices = map(lambda s: ','.join(str(x) for x in s), slices)
+  slices = (elements[i:i+step] for i in range(0, len(elements), step))
+  slices = [','.join(str(x) for x in s) for s in slices]
   return ',\n'.join(slices)
 
 
 def ToCString(contents):
-  return ToCArray(map(ord, contents), step=20)
+  return ToCArray(list(map(ord, contents)), step=20)
 
 
 def ReadFile(filename):
@@ -68,13 +68,13 @@ def ReadLines(filename):
 
 
 def ExpandConstants(lines, constants):
-  for key, value in constants.items():
+  for key, value in list(constants.items()):
     lines = lines.replace(key, str(value))
   return lines
 
 
 def ExpandMacros(lines, macros):
-  for name, macro in macros.items():
+  for name, macro in list(macros.items()):
     start = lines.find(name + '(', 0)
     while start != -1:
       # Scan over the arguments
@@ -113,7 +113,7 @@ class TextMacro:
     self.body = body
   def expand(self, mapping):
     result = self.body
-    for key, value in mapping.items():
+    for key, value in list(mapping.items()):
         result = result.replace(key, value)
     return result
 
@@ -148,14 +148,14 @@ def ReadMacros(lines):
       macro_match = MACRO_PATTERN.match(line)
       if macro_match:
         name = macro_match.group(1)
-        args = map(string.strip, macro_match.group(2).split(','))
+        args = list(map(string.strip, macro_match.group(2).split(',')))
         body = macro_match.group(3).strip()
         macros[name] = TextMacro(args, body)
       else:
         python_match = PYTHON_MACRO_PATTERN.match(line)
         if python_match:
           name = python_match.group(1)
-          args = map(string.strip, python_match.group(2).split(','))
+          args = list(map(string.strip, python_match.group(2).split(',')))
           body = python_match.group(3).strip()
           fun = eval("lambda " + ",".join(args) + ': ' + body)
           macros[name] = PythonMacro(args, fun)
@@ -223,8 +223,8 @@ def Render(var, data):
   # Treat non-ASCII as UTF-8 and convert it to UTF-16.
   if any(ord(c) > 127 for c in data):
     template = TWO_BYTE_STRING
-    data = map(ord, data.decode('utf-8').encode('utf-16be'))
-    data = [data[i] * 256 + data[i+1] for i in xrange(0, len(data), 2)]
+    data = list(map(ord, data.decode('utf-8').encode('utf-16be')))
+    data = [data[i] * 256 + data[i+1] for i in range(0, len(data), 2)]
     data = ToCArray(data)
   else:
     template = ONE_BYTE_STRING

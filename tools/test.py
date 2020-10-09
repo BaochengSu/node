@@ -47,7 +47,8 @@ import ast
 
 from os.path import join, dirname, abspath, basename, isdir, exists
 from datetime import datetime
-from Queue import Queue, Empty
+from queue import Queue, Empty
+from functools import reduce
 
 logger = logging.getLogger('testrunner')
 skip_regex = re.compile(r'# SKIP\S*\s+(.*)', re.IGNORECASE)
@@ -87,11 +88,11 @@ class ProgressIndicator(object):
       negative_marker = '[negative] '
     else:
       negative_marker = ''
-    print "=== %(label)s %(negative)s===" % {
+    print("=== %(label)s %(negative)s===" % {
       'label': test.GetLabel(),
       'negative': negative_marker
-    }
-    print "Path: %s" % "/".join(test.path)
+    })
+    print("Path: %s" % "/".join(test.path))
 
   def Run(self, tasks):
     self.Starting()
@@ -99,7 +100,7 @@ class ProgressIndicator(object):
     # Spawn N-1 threads and then use this thread as the last one.
     # That way -j1 avoids threading altogether which is a nice fallback
     # in case of threading problems.
-    for i in xrange(tasks - 1):
+    for i in range(tasks - 1):
       thread = threading.Thread(target=self.RunSingle, args=[True, i + 1])
       threads.append(thread)
       thread.start()
@@ -109,9 +110,9 @@ class ProgressIndicator(object):
       for thread in threads:
         # Use a timeout so that signals (ctrl-c) will be processed.
         thread.join(timeout=10000000)
-    except (KeyboardInterrupt, SystemExit), e:
+    except (KeyboardInterrupt, SystemExit) as e:
       self.shutdown_event.set()
-    except Exception, e:
+    except Exception as e:
       # If there's an exception we schedule an interruption for any
       # remaining threads.
       self.shutdown_event.set()
@@ -148,7 +149,7 @@ class ProgressIndicator(object):
             output = case.Run()
             output.diagnostic.append('ECONNREFUSED received, test retried')
         case.duration = (datetime.now() - start)
-      except IOError, e:
+      except IOError as e:
         return
       if self.shutdown_event.is_set():
         return
@@ -182,40 +183,40 @@ def EscapeCommand(command):
 class SimpleProgressIndicator(ProgressIndicator):
 
   def Starting(self):
-    print 'Running %i tests' % len(self.cases)
+    print('Running %i tests' % len(self.cases))
 
   def Done(self):
-    print
+    print()
     for failed in self.failed:
       self.PrintFailureHeader(failed.test)
       if failed.output.stderr:
-        print "--- stderr ---"
-        print failed.output.stderr.strip()
+        print("--- stderr ---")
+        print(failed.output.stderr.strip())
       if failed.output.stdout:
-        print "--- stdout ---"
-        print failed.output.stdout.strip()
-      print "Command: %s" % EscapeCommand(failed.command)
+        print("--- stdout ---")
+        print(failed.output.stdout.strip())
+      print("Command: %s" % EscapeCommand(failed.command))
       if failed.HasCrashed():
-        print "--- %s ---" % PrintCrashed(failed.output.exit_code)
+        print("--- %s ---" % PrintCrashed(failed.output.exit_code))
       if failed.HasTimedOut():
-        print "--- TIMEOUT ---"
+        print("--- TIMEOUT ---")
     if len(self.failed) == 0:
-      print "==="
-      print "=== All tests succeeded"
-      print "==="
+      print("===")
+      print("=== All tests succeeded")
+      print("===")
     else:
-      print
-      print "==="
-      print "=== %i tests failed" % len(self.failed)
+      print()
+      print("===")
+      print("=== %i tests failed" % len(self.failed))
       if self.crashed > 0:
-        print "=== %i tests CRASHED" % self.crashed
-      print "==="
+        print("=== %i tests CRASHED" % self.crashed)
+      print("===")
 
 
 class VerboseProgressIndicator(SimpleProgressIndicator):
 
   def AboutToRun(self, case):
-    print 'Starting %s...' % case.GetLabel()
+    print('Starting %s...' % case.GetLabel())
     sys.stdout.flush()
 
   def HasRun(self, output):
@@ -226,7 +227,7 @@ class VerboseProgressIndicator(SimpleProgressIndicator):
         outcome = 'FAIL'
     else:
       outcome = 'pass'
-    print 'Done running %s: %s' % (output.test.GetLabel(), outcome)
+    print('Done running %s: %s' % (output.test.GetLabel(), outcome))
 
 
 class DotsProgressIndicator(SimpleProgressIndicator):
@@ -362,9 +363,9 @@ class DeoptsCheckProgressIndicator(SimpleProgressIndicator):
          ("because:" in line or "reason:" in line):
         if not printed_file:
           printed_file = True
-          print '==== %s ====' % command
+          print('==== %s ====' % command)
           self.failed.append(output)
-        print '  %s' % line
+        print('  %s' % line)
 
   def Done(self):
     pass
@@ -393,15 +394,15 @@ class CompactProgressIndicator(ProgressIndicator):
       self.PrintFailureHeader(output.test)
       stdout = output.output.stdout.strip()
       if len(stdout):
-        print self.templates['stdout'] % stdout
+        print(self.templates['stdout'] % stdout)
       stderr = output.output.stderr.strip()
       if len(stderr):
-        print self.templates['stderr'] % stderr
-      print "Command: %s" % EscapeCommand(output.command)
+        print(self.templates['stderr'] % stderr)
+      print("Command: %s" % EscapeCommand(output.command))
       if output.HasCrashed():
-        print "--- %s ---" % PrintCrashed(output.output.exit_code)
+        print("--- %s ---" % PrintCrashed(output.output.exit_code))
       if output.HasTimedOut():
-        print "--- TIMEOUT ---"
+        print("--- TIMEOUT ---")
 
   def Truncate(self, str, length):
     if length and (len(str) > (length - 3)):
@@ -422,7 +423,7 @@ class CompactProgressIndicator(ProgressIndicator):
     }
     status = self.Truncate(status, 78)
     self.last_status_length = len(status)
-    print status,
+    print(status, end=' ')
     sys.stdout.flush()
 
 
@@ -437,7 +438,7 @@ class ColorProgressIndicator(CompactProgressIndicator):
     super(ColorProgressIndicator, self).__init__(cases, flaky_tests_mode, templates)
 
   def ClearLine(self, last_line_length):
-    print "\033[1K\r",
+    print("\033[1K\r", end=' ')
 
 
 class MonochromeProgressIndicator(CompactProgressIndicator):
@@ -453,7 +454,7 @@ class MonochromeProgressIndicator(CompactProgressIndicator):
     super(MonochromeProgressIndicator, self).__init__(cases, flaky_tests_mode, templates)
 
   def ClearLine(self, last_line_length):
-    print ("\r" + (" " * last_line_length) + "\r"),
+    print(("\r" + (" " * last_line_length) + "\r"), end=' ')
 
 
 PROGRESS_INDICATORS = {
@@ -628,7 +629,7 @@ def KillTimedOutProcess(context, pid):
 
 
 def RunProcess(context, timeout, args, **rest):
-  if context.verbose: print "#", " ".join(args)
+  if context.verbose: print("#", " ".join(args))
   popen_args = args
   prev_error_mode = SEM_INVALID_VALUE;
   if utils.IsWindows():
@@ -707,7 +708,7 @@ def CheckedUnlink(name):
   while True:
     try:
       os.unlink(name)
-    except OSError, e:
+    except OSError as e:
       # On Windows unlink() fails if another process (typically a virus scanner
       # or the indexing service) has the file open. Those processes keep a
       # file open for a short time only, so yield and try again; it'll succeed.
@@ -747,7 +748,7 @@ def Execute(args, context, timeout=None, env={}, faketty=False, disable_core_fil
     del env_copy["NODE_PATH"]
 
   # Extend environment
-  for key, value in env.iteritems():
+  for key, value in env.items():
     env_copy[key] = value
 
   preexec_fn = None
@@ -800,7 +801,7 @@ class TestConfiguration(object):
   def Contains(self, path, file):
     if len(path) > len(file):
       return False
-    for i in xrange(len(path)):
+    for i in range(len(path)):
       if not path[i].match(NormalizePath(file[i])):
         return False
     return True
@@ -1222,15 +1223,15 @@ def ParseCondition(expr):
   """Parses a logical expression into an Expression object"""
   tokens = Tokenizer(expr).Tokenize()
   if not tokens:
-    print "Malformed expression: '%s'" % expr
+    print("Malformed expression: '%s'" % expr)
     return None
   scan = Scanner(tokens)
   ast = ParseLogicalExpression(scan)
   if not ast:
-    print "Malformed expression: '%s'" % expr
+    print("Malformed expression: '%s'" % expr)
     return None
   if scan.HasMore():
-    print "Malformed expression: '%s'" % expr
+    print("Malformed expression: '%s'" % expr)
     return None
   return ast
 
@@ -1300,7 +1301,7 @@ class Rule(object):
   def Contains(self, path):
     if len(self.path) > len(path):
       return False
-    for i in xrange(len(self.path)):
+    for i in range(len(self.path)):
       if not self.path[i].match(path[i]):
         return False
     return True
@@ -1367,7 +1368,7 @@ def BuildOptions():
       help='write test output to file. NOTE: this only applies the tap progress indicator')
   result.add_option("-p", "--progress",
       help="The style of progress indicator (verbose, dots, color, mono, tap)",
-      choices=PROGRESS_INDICATORS.keys(), default="mono")
+      choices=list(PROGRESS_INDICATORS.keys()), default="mono")
   result.add_option("--report", help="Print a summary of the tests to be run",
       default=False, action="store_true")
   result.add_option("-s", "--suite", help="A test suite",
@@ -1437,19 +1438,19 @@ def ProcessOptions(options):
   if options.run == [""]:
     options.run = None
   elif len(options.run) != 2:
-    print "The run argument must be two comma-separated integers."
+    print("The run argument must be two comma-separated integers.")
     return False
   else:
     try:
-      options.run = map(int, options.run)
+      options.run = list(map(int, options.run))
     except ValueError:
-      print "Could not parse the integers from the run argument."
+      print("Could not parse the integers from the run argument.")
       return False
     if options.run[0] < 0 or options.run[1] < 0:
-      print "The run argument cannot have negative integers."
+      print("The run argument cannot have negative integers.")
       return False
     if options.run[0] >= options.run[1]:
-      print "The test group to run (n) must be smaller than number of groups (m)."
+      print("The test group to run (n) must be smaller than number of groups (m).")
       return False
   if options.J:
     # inherit JOBS from environment if provided. some virtualised systems
@@ -1457,7 +1458,7 @@ def ProcessOptions(options):
     cores = os.environ.get('JOBS')
     options.j = int(cores) if cores is not None else multiprocessing.cpu_count()
   if options.flaky_tests not in ["run", "skip", "dontcare"]:
-    print "Unknown flaky-tests mode %s" % options.flaky_tests
+    print("Unknown flaky-tests mode %s" % options.flaky_tests)
     return False
   return True
 
@@ -1474,13 +1475,13 @@ def PrintReport(cases):
   def IsFailOk(o):
     return (len(o) == 2) and (FAIL in o) and (OKAY in o)
   unskipped = [c for c in cases if not SKIP in c.outcomes]
-  print REPORT_TEMPLATE % {
+  print(REPORT_TEMPLATE % {
     'total': len(cases),
     'skipped': len(cases) - len(unskipped),
     'pass': len([t for t in unskipped if list(t.outcomes) == [PASS]]),
     'fail_ok': len([t for t in unskipped if IsFailOk(t.outcomes)]),
     'fail': len([t for t in unskipped if list(t.outcomes) == [FAIL]])
-  }
+  })
 
 
 class Pattern(object):
@@ -1522,9 +1523,9 @@ def GetSpecialCommandProcessor(value):
     return ExpandCommand
   else:
     pos = value.find('@')
-    import urllib
-    prefix = urllib.unquote(value[:pos]).split()
-    suffix = urllib.unquote(value[pos+1:]).split()
+    import urllib.request, urllib.parse, urllib.error
+    prefix = urllib.parse.unquote(value[:pos]).split()
+    suffix = urllib.parse.unquote(value[pos+1:]).split()
     def ExpandCommand(args):
       return prefix + args + suffix
     return ExpandCommand
@@ -1565,8 +1566,8 @@ IGNORED_SUITES = [
 
 def ArgsToTestPaths(test_root, args, suites):
   if len(args) == 0 or 'default' in args:
-    def_suites = filter(lambda s: s not in IGNORED_SUITES, suites)
-    args = filter(lambda a: a != 'default', args) + def_suites
+    def_suites = [s for s in suites if s not in IGNORED_SUITES]
+    args = [a for a in args if a != 'default'] + def_suites
   subsystem_regex = re.compile(r'^[a-zA-Z-]*$')
   check = lambda arg: subsystem_regex.match(arg) and (arg not in suites)
   mapped_args = ["*/test*-%s-*" % arg if check(arg) else arg for arg in args]
@@ -1656,13 +1657,13 @@ def Main():
       for mode in options.mode:
         vm = context.GetVm(arch, mode)
         if not exists(vm):
-          print "Can't find shell executable: '%s'" % vm
+          print("Can't find shell executable: '%s'" % vm)
           continue
         archEngineContext = Execute([vm, "-p", "process.arch"], context)
         vmArch = archEngineContext.stdout.rstrip()
         if archEngineContext.exit_code is not 0 or vmArch == "undefined":
-          print "Can't determine the arch of: '%s'" % vm
-          print archEngineContext.stderr.rstrip()
+          print("Can't determine the arch of: '%s'" % vm)
+          print(archEngineContext.stderr.rstrip())
           continue
         env = {
           'mode': mode,
@@ -1695,15 +1696,15 @@ def Main():
       if key in visited:
         continue
       visited.add(key)
-      print "--- begin source: %s ---" % test.GetLabel()
+      print("--- begin source: %s ---" % test.GetLabel())
       source = test.GetSource().strip()
-      print source
-      print "--- end source: %s ---" % test.GetLabel()
+      print(source)
+      print("--- end source: %s ---" % test.GetLabel())
     return 0
 
   if options.warn_unused:
     for rule in globally_unused_rules:
-      print "Rule for '%s' was not used." % '/'.join([str(s) for s in rule.path])
+      print("Rule for '%s' was not used." % '/'.join([str(s) for s in rule.path]))
 
   tempdir = os.environ.get('NODE_TEST_DIR') or options.temp_dir
   if tempdir:
@@ -1712,7 +1713,7 @@ def Main():
       os.makedirs(tempdir)
     except OSError as exception:
       if exception.errno != errno.EEXIST:
-        print "Could not create the temporary directory", options.temp_dir
+        print("Could not create the temporary directory", options.temp_dir)
         sys.exit(1)
 
   if options.report:
@@ -1730,11 +1731,11 @@ def Main():
     # can be different in different machines
     cases_to_run.sort(key=lambda c: (c.case.arch, c.case.mode, c.case.file))
     cases_to_run = [ cases_to_run[i] for i
-                     in xrange(options.run[0],
+                     in range(options.run[0],
                                len(cases_to_run),
                                options.run[1]) ]
   if len(cases_to_run) == 0:
-    print "No tests to run."
+    print("No tests to run.")
     return 1
   else:
     try:
@@ -1745,13 +1746,13 @@ def Main():
         result = 1
       duration = time.time() - start
     except KeyboardInterrupt:
-      print "Interrupted"
+      print("Interrupted")
       return 1
 
   if options.time:
     # Write the times to stderr to make it easy to separate from the
     # test output.
-    print
+    print()
     sys.stderr.write("--- Total time: %s ---\n" % FormatTime(duration))
     timed_tests = [ t.case for t in cases_to_run if not t.case.duration is None ]
     timed_tests.sort(lambda a, b: a.CompareTime(b))

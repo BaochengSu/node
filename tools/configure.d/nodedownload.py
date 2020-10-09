@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Moved some utilities here from ../../configure
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import hashlib
 import sys
 import zipfile
@@ -18,10 +18,10 @@ def spin(c):
     spin = ".:|'"
     return (spin[c % len(spin)])
 
-class ConfigOpener(urllib.FancyURLopener):
+class ConfigOpener(urllib.request.FancyURLopener):
     """fancy opener used by retrievefile. Set a UA"""
     # append to existing version (UA)
-    version = '%s node.js/configure' % urllib.URLopener.version
+    version = '%s node.js/configure' % urllib.request.URLopener.version
 
 def reporthook(count, size, total):
     """internal hook used by retrievefile"""
@@ -36,10 +36,10 @@ def retrievefile(url, targetfile):
         sys.stdout.write(' <%s>\nConnecting...\r' % url)
         sys.stdout.flush()
         ConfigOpener().retrieve(url, targetfile, reporthook=reporthook)
-        print ''  # clear the line
+        print('')  # clear the line
         return targetfile
     except:
-        print ' ** Error occurred while downloading\n <%s>' % url
+        print(' ** Error occurred while downloading\n <%s>' % url)
         raise
 
 def md5sum(targetfile):
@@ -56,12 +56,12 @@ def unpack(packedfile, parent_path):
     """Unpacks packedfile into parent_path. Assumes .zip. Returns parent_path"""
     if zipfile.is_zipfile(packedfile):
         with contextlib.closing(zipfile.ZipFile(packedfile, 'r')) as icuzip:
-            print ' Extracting zipfile: %s' % packedfile
+            print(' Extracting zipfile: %s' % packedfile)
             icuzip.extractall(parent_path)
             return parent_path
     elif tarfile.is_tarfile(packedfile):
         with contextlib.closing(tarfile.TarFile.open(packedfile, 'r')) as icuzip:
-            print ' Extracting tarfile: %s' % packedfile
+            print(' Extracting tarfile: %s' % packedfile)
             icuzip.extractall(parent_path)
             return parent_path
     else:
@@ -112,16 +112,16 @@ def parse(opt):
         theRet[anOpt] = True
       else:
         # future proof: ignore unknown types
-        print 'Warning: ignoring unknown --download= type "%s"' % anOpt
+        print('Warning: ignoring unknown --download= type "%s"' % anOpt)
   # all done
   return theRet
 
 def candownload(auto_downloads, package):
-  if not (package in auto_downloads.keys()):
+  if not (package in list(auto_downloads.keys())):
     raise Exception('Internal error: "%s" is not in the --downloads list. Check nodedownload.py' % package)
   if auto_downloads[package]:
     return True
   else:
-    print """Warning: Not downloading package "%s". You could pass "--download=all"
-    (Windows: "download-all") to try auto-downloading it.""" % package
+    print("""Warning: Not downloading package "%s". You could pass "--download=all"
+    (Windows: "download-all") to try auto-downloading it.""" % package)
     return False

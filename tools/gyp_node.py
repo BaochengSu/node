@@ -52,7 +52,7 @@ def run_gyp(args):
 
   rc = gyp.main(args)
   if rc != 0:
-    print 'Error running GYP'
+    print('Error running GYP')
     sys.exit(rc)
 
 

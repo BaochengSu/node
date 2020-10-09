@@ -48,6 +48,7 @@ import subprocess
 import sys
 
 from multiprocessing import Pool, cpu_count
+from functools import reduce
 
 
 logging.basicConfig(level=logging.INFO)
@@ -193,7 +194,7 @@ def merge_instrumented_line_results(exe_list, results):
            referenced by all executables.
   """
   def merge_files(x, y):
-    for file_name, lines in y.iteritems():
+    for file_name, lines in y.items():
       x.setdefault(file_name, set([])).update(lines)
     return x
   result = reduce(merge_files, results, {})
@@ -207,7 +208,7 @@ def merge_instrumented_line_results(exe_list, results):
   return {
     'version': 1,
     'tests': sorted(map(os.path.basename, exe_list)),
-    'files': {f: map(lambda l: [l, 0], sorted(result[f])) for f in result},
+    'files': {f: [[l, 0] for l in sorted(result[f])] for f in result},
   }
 
 
@@ -324,7 +325,7 @@ def merge_covered_line_results(data, results):
     """
     file_map, executable = result
     files = data['files']
-    for file_name, lines in file_map.iteritems():
+    for file_name, lines in file_map.items():
       merge_lines(files[file_name], lines, test_bit_masks[executable])
     return data
 
@@ -385,7 +386,7 @@ def split(options):
   logging.info('Splitting off %d coverage files from %s',
                len(data['files']), options.json_input)
 
-  for file_name, coverage in data['files'].iteritems():
+  for file_name, coverage in data['files'].items():
     # Preserve relative directories that are part of the file name.
     file_path = os.path.join(options.output_dir, file_name + '.json')
     try:
@@ -426,26 +427,26 @@ def main(args=None):
   options.build_dir = os.path.abspath(options.build_dir)
   if options.action.lower() == 'all':
     if not options.json_output:
-      print '--json-output is required'
+      print('--json-output is required')
       return 1
     write_instrumented(options)
   elif options.action.lower() == 'merge':
     if not options.coverage_dir:
-      print '--coverage-dir is required'
+      print('--coverage-dir is required')
       return 1
     if not options.json_input:
-      print '--json-input is required'
+      print('--json-input is required')
       return 1
     if not options.json_output:
-      print '--json-output is required'
+      print('--json-output is required')
       return 1
     merge(options)
   elif options.action.lower() == 'split':
     if not options.json_input:
-      print '--json-input is required'
+      print('--json-input is required')
       return 1
     if not options.output_dir:
-      print '--output-dir is required'
+      print('--output-dir is required')
       return 1
     split(options)
   return 0

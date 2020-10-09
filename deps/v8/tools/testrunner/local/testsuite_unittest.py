@@ -35,11 +35,11 @@ class TestSuiteTest(unittest.TestCase):
       },
     }
     suite.FilterTestCasesByStatus(warn_unused_rules=False)
-    self.assertEquals(
+    self.assertEqual(
         [TestCase(suite, 'baz/bar')],
         suite.tests,
     )
-    self.assertEquals(set(['PASS', 'FAIL', 'SLOW']), suite.tests[0].outcomes)
+    self.assertEqual(set(['PASS', 'FAIL', 'SLOW']), suite.tests[0].outcomes)
 
   def test_filter_testcases_by_status_second_pass(self):
     suite = TestSuite('foo', 'bar')
@@ -76,7 +76,7 @@ class TestSuiteTest(unittest.TestCase):
       },
     }
     suite.FilterTestCasesByStatus(warn_unused_rules=False, variants=True)
-    self.assertEquals(
+    self.assertEqual(
         [
           TestCase(suite, 'foo/bar', flags=['-v']),
           TestCase(suite, 'baz/bar'),
@@ -84,11 +84,11 @@ class TestSuiteTest(unittest.TestCase):
         suite.tests,
     )
 
-    self.assertEquals(
+    self.assertEqual(
         set(['PASS', 'SLOW', 'PREV']),
         suite.tests[0].outcomes,
     )
-    self.assertEquals(
+    self.assertEqual(
         set(['PASS', 'FAIL', 'SLOW', 'PREV']),
         suite.tests[1].outcomes,
     )

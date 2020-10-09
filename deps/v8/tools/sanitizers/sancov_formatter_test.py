@@ -187,18 +187,18 @@ class FormatterTests(unittest.TestCase):
   def test_process_symbolizer_output(self):
     result = sancov_formatter.process_symbolizer_output(
         SYMBOLIZER_OUTPUT, BUILD_DIR)
-    self.assertEquals(EXPECTED_PROCESSED_OUTPUT, result)
+    self.assertEqual(EXPECTED_PROCESSED_OUTPUT, result)
 
   def test_merge_instrumented_line_results(self):
     result = sancov_formatter.merge_instrumented_line_results(
       EXE_LIST, INSTRUMENTED_LINE_RESULTS)
-    self.assertEquals(EXPECTED_INSTRUMENTED_LINES_DATA, result)
+    self.assertEqual(EXPECTED_INSTRUMENTED_LINES_DATA, result)
 
   def test_merge_covered_line_results(self):
     data = copy.deepcopy(EXPECTED_INSTRUMENTED_LINES_DATA)
     sancov_formatter.merge_covered_line_results(
       data, COVERED_LINE_RESULTS)
-    self.assertEquals(EXPECTED_COVERED_LINES_DATA, data)
+    self.assertEqual(EXPECTED_COVERED_LINES_DATA, data)
 
   def test_split(self):
     _, json_input = tempfile.mkstemp(prefix='tmp_coverage_test_split')
@@ -217,7 +217,7 @@ class FormatterTests(unittest.TestCase):
         full_path = os.path.join(output_dir, file_name)
         self.assertTrue(os.path.exists(full_path))
         with open(full_path) as f:
-          self.assertEquals(expected_data, json.load(f))
+          self.assertEqual(expected_data, json.load(f))
     finally:
       os.remove(json_input)
       shutil.rmtree(output_dir)

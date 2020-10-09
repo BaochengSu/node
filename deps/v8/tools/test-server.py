@@ -38,7 +38,7 @@ ROOT = os.path.abspath(os.path.dirname(sys.argv[0]))
 
 
 def _PrintUsage():
-  print("""Usage: python %s COMMAND
+  print(("""Usage: python %s COMMAND
 
 Where COMMAND can be any of:
   start     Starts the server. Forks to the background.
@@ -48,7 +48,7 @@ Where COMMAND can be any of:
   update    Alias for "setup".
   trust <keyfile>  Adds the given public key to the list of trusted keys.
   help      Displays this help text.
-  """ % sys.argv[0])
+  """ % sys.argv[0]))
 
 
 def _IsDaemonRunning():
@@ -58,7 +58,7 @@ def _IsDaemonRunning():
 def _Cmd(cmd):
   code = subprocess.call(cmd, shell=True)
   if code != 0:
-    print("Command '%s' returned error code %d" % (cmd, code))
+    print(("Command '%s' returned error code %d" % (cmd, code)))
     sys.exit(code)
 
 
@@ -153,7 +153,7 @@ try:
   from testrunner.server import constants
   from testrunner.server import local_handler
   from testrunner.server import main
-except Exception, e:
+except Exception as e:
   print(e)
   print("Failed to import implementation. Have you run 'setup'?")
   sys.exit(1)
@@ -185,7 +185,7 @@ if __name__ == "__main__":
       if not _IsDaemonRunning():
         print("Server not running.")
       else:
-        print(local_handler.LocalQuery([constants.REQUEST_STATUS]))
+        print((local_handler.LocalQuery([constants.REQUEST_STATUS])))
     else:
       print("Unknown command")
       _PrintUsage()
@@ -203,7 +203,7 @@ if __name__ == "__main__":
       else:
         daemon = main.Server(PIDFILE, ROOT)
         response = daemon.CopyToTrusted(filename)
-      print("Added certificate %s to trusted certificates." % response)
+      print(("Added certificate %s to trusted certificates." % response))
     else:
       print("Unknown command")
       _PrintUsage()

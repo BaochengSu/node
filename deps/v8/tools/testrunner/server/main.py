@@ -113,8 +113,8 @@ class Server(daemon.Daemon):
       try:
         self.PeriodicTasks()
         time.sleep(60)
-      except Exception, e:
-        print("MAIN LOOP EXCEPTION: %s" % e)
+      except Exception as e:
+        print(("MAIN LOOP EXCEPTION: %s" % e))
         self.Shutdown()
         break
       except KeyboardInterrupt:
@@ -159,7 +159,7 @@ class Server(daemon.Daemon):
 
   def DeletePeer(self, peer_address):
     with self.peer_list_lock:
-      for i in xrange(len(self.peers)):
+      for i in range(len(self.peers)):
         if self.peers[i].address == peer_address:
           del self.peers[i]
           return

@@ -34,7 +34,7 @@ from . import commands
 from . import statusfile
 from . import utils
 from ..objects import testcase
-from variants import ALL_VARIANTS, ALL_VARIANT_FLAGS, FAST_VARIANT_FLAGS
+from .variants import ALL_VARIANTS, ALL_VARIANT_FLAGS, FAST_VARIANT_FLAGS
 
 
 FAST_VARIANTS = set(["default", "turbofan"])
@@ -217,22 +217,22 @@ class TestSuite(object):
     if not variants:
       for rule in self.rules[""]:
         if (rule, "") not in used_rules:
-          print("Unused rule: %s -> %s (variant independent)" % (
-              rule, self.rules[""][rule]))
+          print(("Unused rule: %s -> %s (variant independent)" % (
+              rule, self.rules[""][rule])))
       for rule in self.wildcards[""]:
         if (rule, "") not in used_rules:
-          print("Unused rule: %s -> %s (variant independent)" % (
-              rule, self.wildcards[""][rule]))
+          print(("Unused rule: %s -> %s (variant independent)" % (
+              rule, self.wildcards[""][rule])))
     else:
       for variant in ALL_VARIANTS:
         for rule in self.rules[variant]:
           if (rule, variant) not in used_rules:
-            print("Unused rule: %s -> %s (variant: %s)" % (
-                rule, self.rules[variant][rule], variant))
+            print(("Unused rule: %s -> %s (variant: %s)" % (
+                rule, self.rules[variant][rule], variant)))
         for rule in self.wildcards[variant]:
           if (rule, variant) not in used_rules:
-            print("Unused rule: %s -> %s (variant: %s)" % (
-                rule, self.wildcards[variant][rule], variant))
+            print(("Unused rule: %s -> %s (variant: %s)" % (
+                rule, self.wildcards[variant][rule], variant)))
 
 
   def FilterTestCasesByArgs(self, args):
@@ -320,17 +320,17 @@ class GoogleTestSuite(TestSuite):
       shell += ".exe"
 
     output = None
-    for i in xrange(3): # Try 3 times in case of errors.
+    for i in range(3): # Try 3 times in case of errors.
       output = commands.Execute(context.command_prefix +
                                 [shell, "--gtest_list_tests"] +
                                 context.extra_flags)
       if output.exit_code == 0:
         break
-      print "Test executable failed to list the tests (try %d).\n\nStdout:" % i
-      print output.stdout
-      print "\nStderr:"
-      print output.stderr
-      print "\nExit code: %d" % output.exit_code
+      print("Test executable failed to list the tests (try %d).\n\nStdout:" % i)
+      print(output.stdout)
+      print("\nStderr:")
+      print(output.stderr)
+      print("\nExit code: %d" % output.exit_code)
     else:
       raise Exception("Test executable failed to list the tests.")
 

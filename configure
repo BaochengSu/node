@@ -1008,7 +1008,7 @@ def configure_library(lib, output):
       output['include_dirs'] += [options.__dict__[shared_lib + '_includes']]
     elif pkg_cflags:
       output['include_dirs'] += (
-          filter(None, map(str.strip, pkg_cflags.split('-I'))))
+          [_f for _f in map(str.strip, pkg_cflags.split('-I')) if _f])
 
     # libpath needs to be provided ahead libraries
     if options.__dict__[shared_lib + '_libpath']:
@@ -1018,7 +1018,7 @@ def configure_library(lib, output):
       output['libraries'] += [pkg_libpath]
 
     default_libs = getattr(options, shared_lib + '_libname')
-    default_libs = map('-l{0}'.format, default_libs.split(','))
+    default_libs = list(map('-l{0}'.format, default_libs.split(',')))
 
     if default_libs:
       output['libraries'] += default_libs
@@ -1221,7 +1221,7 @@ def configure_intl(o):
     # safe to split, cannot contain spaces
     o['libraries'] += libs.split()
     if cflags:
-      o['include_dirs'] += filter(None, map(str.strip, cflags.split('-I')))
+      o['include_dirs'] += [_f for _f in map(str.strip, cflags.split('-I')) if _f]
     # use the "system" .gyp
     o['variables']['icu_gyp_path'] = 'tools/icu/icu-system.gyp'
     return
@@ -1502,7 +1502,7 @@ config = {
 if options.prefix:
   config['PREFIX'] = options.prefix
 
-config = '\n'.join(map('='.join, config.iteritems())) + '\n'
+config = '\n'.join(map('='.join, iter(config.items()))) + '\n'
 
 # On Windows there's no reason to search for a different python binary.
 bin_override = None if sys.platform == 'win32' else make_bin_override()

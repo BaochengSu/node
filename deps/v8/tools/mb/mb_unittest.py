@@ -7,7 +7,7 @@
 """Tests for mb.py."""
 
 import json
-import StringIO
+import io
 import os
 import sys
 import unittest
@@ -232,7 +232,7 @@ class UnitTest(unittest.TestCase):
         mbw.ToAbsPath('//build/args/bots/fake_master/fake_gn_args_bot.gn'),
         'is_debug = false\n')
     if files:
-      for path, contents in files.items():
+      for path, contents in list(files.items()):
         mbw.files[path] = contents
     return mbw
 
@@ -354,7 +354,7 @@ class UnitTest(unittest.TestCase):
     self.assertEqual(['all', 'foo_unittests'], out['compile_targets'])
 
   def test_analyze_handles_way_too_many_results(self):
-    too_many_files = ', '.join(['"//foo:foo%d"' % i for i in xrange(4 * 1024)])
+    too_many_files = ', '.join(['"//foo:foo%d"' % i for i in range(4 * 1024)])
     files = {'/tmp/in.json': '''{\
                "files": ["foo/foo_unittest.cc"],
                "test_targets": ["foo_unittests"],
@@ -575,7 +575,7 @@ class UnitTest(unittest.TestCase):
   def test_help(self):
     orig_stdout = sys.stdout
     try:
-      sys.stdout = StringIO.StringIO()
+      sys.stdout = io.StringIO()
       self.assertRaises(SystemExit, self.check, ['-h'])
       self.assertRaises(SystemExit, self.check, ['help'])
       self.assertRaises(SystemExit, self.check, ['help', 'gen'])

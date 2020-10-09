@@ -25,7 +25,7 @@ def apply_gyp_environment(file_path=None):
   file_contents = open(file_path).read()
   try:
     file_data = eval(file_contents, {'__builtins__': None}, None)
-  except SyntaxError, e:
+  except SyntaxError as e:
     e.filename = os.path.abspath(file_path)
     raise
   supported_vars = ( 'V8_GYP_FILE',
@@ -38,9 +38,9 @@ def apply_gyp_environment(file_path=None):
     val = file_data.get(var)
     if val:
       if var in os.environ:
-        print 'INFO: Environment value for "%s" overrides value in %s.' % (
+        print('INFO: Environment value for "%s" overrides value in %s.' % (
             var, os.path.abspath(file_path)
-        )
+        ))
       else:
         os.environ[var] = val
 

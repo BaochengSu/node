@@ -18,7 +18,7 @@ All arguments are optional. Most combinations should work, e.g.:
 """
 # See HELP below for additional documentation.
 
-from __future__ import print_function
+
 import errno
 import multiprocessing
 import os

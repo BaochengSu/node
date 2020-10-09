@@ -95,7 +95,7 @@ class TestUpdateNode(unittest.TestCase):
     # Check expectations.
     with open(os.path.join(node_cwd, 'deps', 'v8', '.gitignore')) as f:
       actual_gitignore = f.read()
-    self.assertEquals(EXPECTED_GITIGNORE.strip(), actual_gitignore.strip())
+    self.assertEqual(EXPECTED_GITIGNORE.strip(), actual_gitignore.strip())
     for f in ADDED_FILES:
       added_file = os.path.join(node_cwd, 'deps', 'v8', *f.split('/'))
       self.assertTrue(os.path.exists(added_file))
@@ -106,7 +106,7 @@ class TestUpdateNode(unittest.TestCase):
         ['git', 'diff', 'master', '--summary'],
         cwd=node_cwd,
     )
-    self.assertEquals(EXPECTED_GIT_DIFF.strip(), gitlog.strip())
+    self.assertEqual(EXPECTED_GIT_DIFF.strip(), gitlog.strip())
 
     # Check patch.
     gitlog = subprocess.check_output(

@@ -85,7 +85,7 @@ def WriteToTemporaryFile(data):
 
 def Main():
   if (len(sys.argv) == 1):
-    print("Usage: %s <command-to-run-on-device>" % sys.argv[0])
+    print(("Usage: %s <command-to-run-on-device>" % sys.argv[0]))
     return 1
   workspace = abspath(join(dirname(sys.argv[0]), '..'))
   v8_root = "/data/local/tmp/v8"

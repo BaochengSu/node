@@ -5,7 +5,7 @@
 
 import unittest
 
-from pool import Pool
+from .pool import Pool
 
 def Run(x):
   if x == 10:
@@ -18,7 +18,7 @@ class PoolTest(unittest.TestCase):
     pool = Pool(3)
     for result in pool.imap_unordered(Run, [[x] for x in range(0, 10)]):
       results.add(result.value)
-    self.assertEquals(set(range(0, 10)), results)
+    self.assertEqual(set(range(0, 10)), results)
 
   def testException(self):
     results = set()
@@ -29,7 +29,7 @@ class PoolTest(unittest.TestCase):
         results.add(result.value)
     expect = set(range(0, 12))
     expect.remove(10)
-    self.assertEquals(expect, results)
+    self.assertEqual(expect, results)
 
   def testAdd(self):
     results = set()
@@ -38,5 +38,5 @@ class PoolTest(unittest.TestCase):
       results.add(result.value)
       if result.value < 30:
         pool.add([result.value + 20])
-    self.assertEquals(set(range(0, 10) + range(20, 30) + range(40, 50)),
+    self.assertEqual(set(list(range(0, 10)) + list(range(20, 30)) + list(range(40, 50))),
                       results)

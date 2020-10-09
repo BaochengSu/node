@@ -96,7 +96,7 @@ def BuildRevisionRanges(cr_releases):
   cr_releases = FilterDuplicatesAndReverse(cr_releases)
 
   # Visit pairs of cr releases from oldest to newest.
-  for cr_from, cr_to in itertools.izip(
+  for cr_from, cr_to in zip(
       cr_releases, itertools.islice(cr_releases, 1, None)):
 
     # Assume the chromium revisions are all different.
@@ -112,7 +112,7 @@ def BuildRevisionRanges(cr_releases):
     range_lists.setdefault(cr_releases[-1][1], []).append(cr_releases[-1][0])
 
   # Stringify and comma-separate the range lists.
-  return dict((hsh, ", ".join(ran)) for hsh, ran in range_lists.iteritems())
+  return dict((hsh, ", ".join(ran)) for hsh, ran in range_lists.items())
 
 
 def MatchSafe(match):
@@ -260,13 +260,13 @@ class RetrieveV8Releases(Step):
     try:
       if (VERSION_FILE not in self.GitChangedFiles(revision) or
           not self.GitCheckoutFileSafe(VERSION_FILE, revision)):
-        print "Skipping revision %s" % revision
+        print("Skipping revision %s" % revision)
         return []  # pragma: no cover
 
-      branches = map(
+      branches = list(map(
           str.strip,
           self.Git("branch -r --contains %s" % revision).strip().splitlines(),
-      )
+      ))
       branch = ""
       for b in branches:
         if b.startswith("origin/"):
@@ -276,7 +276,7 @@ class RetrieveV8Releases(Step):
           branch = b.split("branch-heads/")[1]
           break
       else:
-        print "Could not determine branch for %s" % revision
+        print("Could not determine branch for %s" % revision)
 
       release, _ = self.GetRelease(revision, branch)
       releases.append(release)
@@ -377,7 +377,7 @@ class RetrieveChromiumV8Releases(Step):
     # Add the chromium ranges to the v8 candidates and master releases.
     all_ranges = BuildRevisionRanges(cr_releases)
 
-    for hsh, ranges in all_ranges.iteritems():
+    for hsh, ranges in all_ranges.items():
       releases_dict.get(hsh, {})["chromium_revision"] = ranges
 
 
@@ -392,12 +392,10 @@ class RetrieveChromiumBranches(Step):
     releases_dict = dict((r["revision_git"], r) for r in self["releases"])
 
     # Filter out irrelevant branches.
-    branches = filter(lambda r: re.match(r"branch-heads/\d+", r),
-                      self.GitRemotes(cwd=cwd))
+    branches = [r for r in self.GitRemotes(cwd=cwd) if re.match(r"branch-heads/\d+", r)]
 
     # Transform into pure branch numbers.
-    branches = map(lambda r: int(re.match(r"branch-heads/(\d+)", r).group(1)),
-                   branches)
+    branches = [int(re.match(r"branch-heads/(\d+)", r).group(1)) for r in branches]
 
     branches = sorted(branches, reverse=True)
 
@@ -430,7 +428,7 @@ class RetrieveChromiumBranches(Step):
 
     # Add the chromium branches to the v8 candidate releases.
     all_ranges = BuildRevisionRanges(cr_branches)
-    for revision, ranges in all_ranges.iteritems():
+    for revision, ranges in all_ranges.items():
       releases_dict.get(revision, {})["chromium_branch"] = ranges
 
 
@@ -530,7 +528,7 @@ class WriteOutput(Step):
       with open(self._options.json, "w") as f:
         f.write(json.dumps(output))
     if not self._options.csv and not self._options.json:
-      print output  # pragma: no cover
+      print(output)  # pragma: no cover
 
 
 class Releases(ScriptsBase):

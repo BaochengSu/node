@@ -27,7 +27,7 @@
 
 
 import socket
-import SocketServer
+import socketserver
 import threading
 try:
   import ujson as json
@@ -51,7 +51,7 @@ def GetOwnIP():
   return ip
 
 
-class PresenceHandler(SocketServer.BaseRequestHandler):
+class PresenceHandler(socketserver.BaseRequestHandler):
 
   def handle(self):
     data = json.loads(self.request[0].strip())
@@ -86,11 +86,11 @@ class PresenceHandler(SocketServer.BaseRequestHandler):
         self.server.shutdown_lock.release()
 
 
-class PresenceDaemon(SocketServer.ThreadingMixIn, SocketServer.UDPServer):
+class PresenceDaemon(socketserver.ThreadingMixIn, socketserver.UDPServer):
   def __init__(self, daemon):
     self.daemon = daemon
     address = (daemon.ip, constants.PRESENCE_PORT)
-    SocketServer.UDPServer.__init__(self, address, PresenceHandler)
+    socketserver.UDPServer.__init__(self, address, PresenceHandler)
     self.shutdown_lock = threading.Lock()
 
   def shutdown(self):
@@ -98,7 +98,7 @@ class PresenceDaemon(SocketServer.ThreadingMixIn, SocketServer.UDPServer):
     self.SendToAll(json.dumps([EXIT_REQUEST]))
     self.shutdown_lock.acquire()
     self.shutdown_lock.release()
-    SocketServer.UDPServer.shutdown(self)
+    socketserver.UDPServer.shutdown(self)
 
   def SendTo(self, target, message):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

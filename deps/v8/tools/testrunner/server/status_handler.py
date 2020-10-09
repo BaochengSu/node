@@ -27,7 +27,7 @@
 
 
 import socket
-import SocketServer
+import socketserver
 
 from . import compression
 from . import constants
@@ -74,7 +74,7 @@ def TryTransitiveTrust(peer, pubkey, server):
     server.AcceptNewTrusted(result)
 
 
-class StatusHandler(SocketServer.BaseRequestHandler):
+class StatusHandler(socketserver.BaseRequestHandler):
   def handle(self):
     rec = compression.Receiver(self.request)
     while not rec.IsDone():
@@ -105,8 +105,8 @@ class StatusHandler(SocketServer.BaseRequestHandler):
     compression.Send(constants.END_OF_STREAM, self.request)
 
 
-class StatusSocketServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
+class StatusSocketServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
   def __init__(self, daemon):
     address = (daemon.ip, constants.STATUS_PORT)
-    SocketServer.TCPServer.__init__(self, address, StatusHandler)
+    socketserver.TCPServer.__init__(self, address, StatusHandler)
     self.daemon = daemon

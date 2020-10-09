@@ -10,7 +10,7 @@ import re
 import sys
 
 if len(sys.argv) != 5:
-  print "usage: specialize_node_d.py outfile src/node.d flavor arch"
+  print("usage: specialize_node_d.py outfile src/node.d flavor arch")
   sys.exit(2);
 
 outfile = file(sys.argv[1], 'w');

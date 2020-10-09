@@ -40,13 +40,13 @@ def Main(argv):
   cov = coverage.coverage(include=([os.path.join(script_path, '*.py')]))
   cov.start()
   import test_scripts
-  alltests = map(unittest.TestLoader().loadTestsFromTestCase, [
+  alltests = list(map(unittest.TestLoader().loadTestsFromTestCase, [
     test_scripts.ToplevelTest,
     test_scripts.ScriptTest,
-  ])
+  ]))
   unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(alltests))
   cov.stop()
-  print cov.report()
+  print(cov.report())
 
 
 if __name__ == '__main__':

@@ -145,13 +145,13 @@ def _make_jsmin(python_only=False):
     def id_literal_(what):
         """ Make id_literal like char class """
         match = _re.compile(what).match
-        result = ''.join([chr(c) for c in xrange(127) if not match(chr(c))])
+        result = ''.join([chr(c) for c in range(127) if not match(chr(c))])
         return '[^%s]' % fix_charclass(result)
 
     def not_id_literal_(keep):
         """ Make negated id_literal like char class """
         match = _re.compile(id_literal_(keep)).match
-        result = ''.join([chr(c) for c in xrange(127) if not match(chr(c))])
+        result = ''.join([chr(c) for c in range(127) if not match(chr(c))])
         return r'[%s]' % fix_charclass(result)
 
     not_id_literal = not_id_literal_(r'[a-zA-Z0-9_$]')

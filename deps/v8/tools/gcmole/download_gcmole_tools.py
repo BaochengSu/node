@@ -19,4 +19,4 @@ if re.search(r'\bgcmole=1', os.environ.get('GYP_DEFINES', '')):
     '--platform=linux*'
   ])
 else:
-  print 'Skipping gcmole download as gcmole is not set in gyp flags.'
+  print('Skipping gcmole download as gcmole is not set in gyp flags.')

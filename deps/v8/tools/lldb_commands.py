@@ -52,9 +52,9 @@ def bta(debugger, *args):
 
     if sourceFile is None:
       sourceFile = ""
-    print("[%-2s] %-60s %-40s" % (frame.GetFrameID(),
+    print(("[%-2s] %-60s %-40s" % (frame.GetFrameID(),
                                   functionName.group(1),
-                                  sourceFile))
+                                  sourceFile)))
     match = assert_re.match(str(functionSignature))
     if match:
       if match.group(3) == "false":
@@ -63,8 +63,8 @@ def bta(debugger, *args):
       else:
         prefix = "Allow"
         color = "\033[92m"
-      print("%s -> %s %s (%s)\033[0m" % (
-          color, prefix, match.group(2), match.group(1)))
+      print(("%s -> %s %s (%s)\033[0m" % (
+          color, prefix, match.group(2), match.group(1))))
 
 def __lldb_init_module (debugger, dict):
   debugger.HandleCommand('command script add -f lldb_commands.jst jst')

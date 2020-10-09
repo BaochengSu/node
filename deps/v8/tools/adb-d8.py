@@ -17,17 +17,17 @@
 #
 # Run adb-d8.py --help for complete usage information.
 
-from __future__ import print_function
+
 
 import os
 import sys
 import struct
 import threading
 import subprocess
-import SocketServer # TODO(leszeks): python 3 compatibility
+import socketserver # TODO(leszeks): python 3 compatibility
 
 def CreateFileHandlerClass(root_dirs, verbose):
-  class FileHandler(SocketServer.BaseRequestHandler):
+  class FileHandler(socketserver.BaseRequestHandler):
     def handle(self):
       data = self.request.recv(1024);
       while data[-1] != "\0":
@@ -208,7 +208,7 @@ def Main():
   # Start a file server for the files d8 might need.
   script_root_dir = os.path.abspath(os.curdir)
   root_dirs.append(script_root_dir)
-  server = SocketServer.TCPServer(
+  server = socketserver.TCPServer(
     ("localhost", 0), # 0 means an arbitrary unused port.
     CreateFileHandlerClass(root_dirs, verbose)
   )

@@ -213,7 +213,7 @@ def normalize_types(obj, domain_name, types):
         for item in obj:
             normalize_types(item, domain_name, types)
     elif isinstance(obj, dict):
-        for key, value in obj.items():
+        for key, value in list(obj.items()):
             if key == "$ref" and value.find(".") == -1:
                 obj[key] = "%s.%s" % (domain_name, value)
             elif key == "id":
@@ -467,9 +467,9 @@ def main():
     if arg_options.show_changes:
         changes = compare_schemas(domains, baseline_domains, True)
         if len(changes) > 0:
-            print "  Public changes since %s:" % version
+            print("  Public changes since %s:" % version)
             for change in changes:
-                print "    %s" % change
+                print("    %s" % change)
 
     if arg_options.stamp:
         with open(arg_options.stamp, 'a') as _:

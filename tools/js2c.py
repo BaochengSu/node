@@ -34,8 +34,6 @@
 import os
 import re
 import sys
-import string
-
 
 def ToCArray(elements, step=10):
   slices = (elements[i:i+step] for i in range(0, len(elements), step))
@@ -148,14 +146,14 @@ def ReadMacros(lines):
       macro_match = MACRO_PATTERN.match(line)
       if macro_match:
         name = macro_match.group(1)
-        args = list(map(string.strip, macro_match.group(2).split(',')))
+        args = [x.strip() for x in macro_match.group(2).split(',')]
         body = macro_match.group(3).strip()
         macros[name] = TextMacro(args, body)
       else:
         python_match = PYTHON_MACRO_PATTERN.match(line)
         if python_match:
           name = python_match.group(1)
-          args = list(map(string.strip, python_match.group(2).split(',')))
+          args = [x.strip() for x in python_match.group(2).split(',')]
           body = python_match.group(3).strip()
           fun = eval("lambda " + ",".join(args) + ': ' + body)
           macros[name] = PythonMacro(args, fun)
@@ -223,8 +221,8 @@ def Render(var, data):
   # Treat non-ASCII as UTF-8 and convert it to UTF-16.
   if any(ord(c) > 127 for c in data):
     template = TWO_BYTE_STRING
-    data = list(map(ord, data.decode('utf-8').encode('utf-16be')))
-    data = [data[i] * 256 + data[i+1] for i in range(0, len(data), 2)]
+    data = bytearray(data, 'utf-16le')
+    data = [data[i] + data[i+1]*256 for i in range(0, len(data), 2)]
     data = ToCArray(data)
   else:
     template = ONE_BYTE_STRING

@@ -522,7 +522,6 @@ class Undefined(object):
 
     def __bool__(self):
         return False
-    __bool__ = __nonzero__
 
     def __repr__(self):
         return 'Undefined'

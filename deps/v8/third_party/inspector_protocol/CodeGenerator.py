@@ -449,7 +449,7 @@ class Protocol(object):
     def is_async_command(self, domain, command):
         if not self.config.protocol.options:
             return False
-        return self.check_options(self.config.protocol.options, domain, command, "async", None, False)
+        return self.check_options(self.config.protocol.options, domain, command, "async_", None, False)
 
 
     def is_exported(self, domain, name):

@@ -72,6 +72,8 @@ def read_config():
         config_values = arg_options.config_value
         if not config_values:
             config_values = []
+        print("DEBUG: output_base: {}\njinja_dir: {}\nconfig: {}\nconfig_value: {}".format(output_base,
+            jinja_dir, config_file, config_values))
     except Exception:
         # Work with python 2 and 3 http://docs.python.org/py3k/howto/pyporting.html
         exc = sys.exc_info()[1]

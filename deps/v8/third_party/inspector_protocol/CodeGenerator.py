@@ -108,6 +108,7 @@ def read_config():
         # Work with python 2 and 3 http://docs.python.org/py3k/howto/pyporting.html
         exc = sys.exc_info()[1]
         sys.stderr.write("Failed to parse config file: %s\n\n" % exc)
+        sys.stderr.write("config file: {}".format(config_file))
         exit(1)
 
 

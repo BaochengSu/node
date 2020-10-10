@@ -31,6 +31,9 @@ def read_config():
             items = [(k, os.path.join(config_base, v) if k == "path" else v) for (k, v) in list(object_dict.items())]
             items = [(k, os.path.join(output_base, v) if k == "output" else v) for (k, v) in items]
             keys, values = list(zip(*items))
+            # 'async' is a keyword since Python 3.7.
+            # Avoid namedtuple(rename=True) for compatibility with Python 2.X.
+            keys = tuple('async_' if k == 'async' else k for k in keys)
             return collections.namedtuple('X', keys)(*values)
         return json.loads(data, object_hook=json_object_hook)
 

@@ -627,8 +627,7 @@ def emit_set(out, consts):
 # Emit the whole output file.
 #
 def emit_config():
-        out = file(sys.argv[1], 'w');
-
+    with open(sys.argv[1], 'w') as out:
         out.write(header);
 
         out.write('/* miscellaneous constants */\n');

@@ -161,12 +161,12 @@ struct StringPtr {
 
 class Parser : public AsyncWrap {
  public:
-  Parser(Environment* env, Local<Object> wrap, enum http_parser_type type)
+  Parser(Environment* env, Local<Object> wrap, enum http_parser_type type, bool lenient)
       : AsyncWrap(env, wrap, AsyncWrap::PROVIDER_HTTPPARSER),
         current_buffer_len_(0),
         current_buffer_data_(nullptr) {
     Wrap(object(), this);
-    Init(type);
+    Init(type, lenient);
   }
 
 
@@ -383,7 +383,7 @@ class Parser : public AsyncWrap {
     http_parser_type type =
         static_cast<http_parser_type>(args[0]->Int32Value());
     CHECK(type == HTTP_REQUEST || type == HTTP_RESPONSE);
-    new Parser(env, args.This(), type);
+    new Parser(env, args.This(), type, args[1]->IsTrue());
   }
 
 
@@ -476,6 +476,7 @@ class Parser : public AsyncWrap {
 
   static void Reinitialize(const FunctionCallbackInfo<Value>& args) {
     Environment* env = Environment::GetCurrent(args);
+    bool lenient = args[2]->IsTrue();
 
     CHECK(args[0]->IsInt32());
     CHECK(args[1]->IsBoolean());
@@ -494,7 +495,7 @@ class Parser : public AsyncWrap {
     if (isReused) {
       parser->AsyncReset();
     }
-    parser->Init(type);
+    parser->Init(type, lenient);
   }
 
 
@@ -738,8 +739,9 @@ class Parser : public AsyncWrap {
   }
 
 
-  void Init(enum http_parser_type type) {
+  void Init(enum http_parser_type type, bool lenient) {
     http_parser_init(&parser_, type);
+    parser_.lenient_http_headers = lenient;
     url_.Reset();
     status_message_.Reset();
     num_fields_ = 0;

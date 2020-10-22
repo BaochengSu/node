@@ -509,6 +509,8 @@ void SecureContext::Init(const FunctionCallbackInfo<Value>& args) {
   ASSIGN_OR_RETURN_UNWRAP(&sc, args.Holder());
   Environment* env = sc->env();
 
+  int min_version = 0;
+  int max_version = 0;
   const SSL_METHOD* method = TLS_method();
 
   if (args.Length() == 1 && args[0]->IsString()) {
@@ -531,29 +533,95 @@ void SecureContext::Init(const FunctionCallbackInfo<Value>& args) {
     } else if (strcmp(*sslmethod, "SSLv3_client_method") == 0) {
       return env->ThrowError("SSLv3 methods disabled");
     } else if (strcmp(*sslmethod, "SSLv23_method") == 0) {
+      #if OPENSSL_VERSION_NUMBER >= 0x10100000L
+      method = TLS_method();
+      #else
       method = SSLv23_method();
+      #endif
     } else if (strcmp(*sslmethod, "SSLv23_server_method") == 0) {
+      #if OPENSSL_VERSION_NUMBER >= 0x10100000L
+      method = TLS_server_method();
+      #else
       method = SSLv23_server_method();
+      #endif
     } else if (strcmp(*sslmethod, "SSLv23_client_method") == 0) {
+      #if OPENSSL_VERSION_NUMBER >= 0x10100000L
+      method = TLS_client_method();
+      #else
       method = SSLv23_client_method();
+      #endif
     } else if (strcmp(*sslmethod, "TLSv1_method") == 0) {
+      #if OPENSSL_VERSION_NUMBER >= 0x10100000L
+      min_version = TLS1_VERSION;
+      max_version = TLS1_VERSION;
+      method = TLS_method();
+      #else
       method = TLSv1_method();
+      #endif
     } else if (strcmp(*sslmethod, "TLSv1_server_method") == 0) {
+      #if OPENSSL_VERSION_NUMBER >= 0x10100000L
+      min_version = TLS1_VERSION;
+      max_version = TLS1_VERSION;
+      method = TLS_server_method();
+      #else
       method = TLSv1_server_method();
+      #endif
     } else if (strcmp(*sslmethod, "TLSv1_client_method") == 0) {
+      #if OPENSSL_VERSION_NUMBER >= 0x10100000L
+      min_version = TLS1_VERSION;
+      max_version = TLS1_VERSION;
+      method = TLS_client_method();
+      #else
       method = TLSv1_client_method();
+      #endif
     } else if (strcmp(*sslmethod, "TLSv1_1_method") == 0) {
+      #if OPENSSL_VERSION_NUMBER >= 0x10100000L
+      min_version = TLS1_1_VERSION;
+      max_version = TLS1_1_VERSION;
+      method = TLS_method();
+      #else
       method = TLSv1_1_method();
+      #endif
     } else if (strcmp(*sslmethod, "TLSv1_1_server_method") == 0) {
+      #if OPENSSL_VERSION_NUMBER >= 0x10100000L
+      min_version = TLS1_1_VERSION;
+      max_version = TLS1_1_VERSION;
+      method = TLS_server_method();
+      #else
       method = TLSv1_1_server_method();
+      #endif
     } else if (strcmp(*sslmethod, "TLSv1_1_client_method") == 0) {
+      #if OPENSSL_VERSION_NUMBER >= 0x10100000L
+      min_version = TLS1_1_VERSION;
+      max_version = TLS1_1_VERSION;
+      method = TLS_client_method();
+      #else
       method = TLSv1_1_client_method();
+      #endif
     } else if (strcmp(*sslmethod, "TLSv1_2_method") == 0) {
+      #if OPENSSL_VERSION_NUMBER >= 0x10100000L
+      min_version = TLS1_2_VERSION;
+      max_version = TLS1_2_VERSION;
+      method = TLS_method();
+      #else
       method = TLSv1_2_method();
+      #endif
     } else if (strcmp(*sslmethod, "TLSv1_2_server_method") == 0) {
+      #if OPENSSL_VERSION_NUMBER >= 0x10100000L
+      min_version = TLS1_2_VERSION;
+      max_version = TLS1_2_VERSION;
+      method = TLS_server_method();
+      #else
       method = TLSv1_2_server_method();
+      #endif
     } else if (strcmp(*sslmethod, "TLSv1_2_client_method") == 0) {
+      #if OPENSSL_VERSION_NUMBER >= 0x10100000L
+      min_version = TLS1_2_VERSION;
+      max_version = TLS1_2_VERSION;
+      method = TLS_client_method();
+      #else
       method = TLSv1_2_client_method();
+      #endif
     } else {
       return env->ThrowError("Unknown method");
     }
@@ -578,6 +646,13 @@ void SecureContext::Init(const FunctionCallbackInfo<Value>& args) {
   SSL_CTX_sess_set_new_cb(sc->ctx_, SSLWrap<Connection>::NewSessionCallback);
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
+  SSL_CTX_set_min_proto_version(sc->ctx_, min_version);
+  if (max_version == 0) {
+    // Selecting some secureProtocol methods allows the TLS version to be "any
+    // supported", but we don't support TLSv1.3, even if OpenSSL does.
+    max_version = TLS1_2_VERSION;
+  }
+  SSL_CTX_set_max_proto_version(sc->ctx_, max_version);
   // OpenSSL 1.1.0 changed the ticket key size, but the OpenSSL 1.0.x size was
   // exposed in the public API. To retain compatibility, install a callback
   // which restores the old algorithm.

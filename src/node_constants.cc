@@ -921,6 +921,10 @@ void DefineOpenSSLConstants(Local<Object> target) {
     NODE_DEFINE_CONSTANT(target, ENGINE_METHOD_ECDSA);
 # endif
 
+# ifdef ENGINE_METHOD_EC
+    NODE_DEFINE_CONSTANT(target, ENGINE_METHOD_EC);
+# endif
+
 # ifdef ENGINE_METHOD_CIPHERS
     NODE_DEFINE_CONSTANT(target, ENGINE_METHOD_CIPHERS);
 # endif

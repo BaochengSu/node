@@ -58,7 +58,7 @@ def PrintReport(tests):
     if list(o) == [statusfile.PASS]: passes += 1
     if statusfile.IsFailOk(o): fail_ok += 1
     if list(o) == [statusfile.FAIL]: fail += 1
-  print REPORT_TEMPLATE % {
+  print(REPORT_TEMPLATE % {
     "total": total,
     "skipped": skipped,
     "timeout": timeout,
@@ -66,7 +66,7 @@ def PrintReport(tests):
     "pass": passes,
     "fail_ok": fail_ok,
     "fail": fail
-  }
+  })
 
 
 def PrintTestSource(tests):
@@ -74,9 +74,9 @@ def PrintTestSource(tests):
     suite = test.suite
     source = suite.GetSourceForTest(test).strip()
     if len(source) > 0:
-      print "--- begin source: %s/%s ---" % (suite.name, test.path)
-      print source
-      print "--- end source: %s/%s ---" % (suite.name, test.path)
+      print("--- begin source: %s/%s ---" % (suite.name, test.path))
+      print(source)
+      print("--- end source: %s/%s ---" % (suite.name, test.path))
 
 
 def FormatTime(d):
@@ -87,7 +87,7 @@ def FormatTime(d):
 def PrintTestDurations(suites, overall_time):
     # Write the times to stderr to make it easy to separate from the
     # test output.
-    print
+    print()
     sys.stderr.write("--- Total time: %s ---\n" % FormatTime(overall_time))
     timed_tests = [ t for s in suites for t in s.tests
                     if t.duration is not None ]

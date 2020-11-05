@@ -27,8 +27,8 @@
 
 
 import socket
-import SocketServer
-import StringIO
+import socketserver
+import io
 
 from . import compression
 from . import constants
@@ -51,7 +51,7 @@ def LocalQuery(query):
   return data
 
 
-class LocalHandler(SocketServer.BaseRequestHandler):
+class LocalHandler(socketserver.BaseRequestHandler):
   def handle(self):
     rec = compression.Receiver(self.request)
     while not rec.IsDone():
@@ -94,7 +94,7 @@ class LocalHandler(SocketServer.BaseRequestHandler):
     compression.Send(constants.END_OF_STREAM, self.request)
 
   def _GetStatusMessage(self):
-    sio = StringIO.StringIO()
+    sio = io.StringIO()
     sio.write("Peers:\n")
     with self.server.daemon.peer_list_lock:
       for p in self.server.daemon.peers:
@@ -112,8 +112,8 @@ class LocalHandler(SocketServer.BaseRequestHandler):
     return result
 
 
-class LocalSocketServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
+class LocalSocketServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
   def __init__(self, daemon):
-    SocketServer.TCPServer.__init__(self, ("localhost", constants.CLIENT_PORT),
+    socketserver.TCPServer.__init__(self, ("localhost", constants.CLIENT_PORT),
                                     LocalHandler)
     self.daemon = daemon

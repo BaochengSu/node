@@ -143,7 +143,7 @@ IGNORE_LINES = [re.compile(exp) for exp in IGNORE_LINES]
 ORIGINAL_SOURCE_PREFIX = 'v8-foozzie source: '
 
 def line_pairs(lines):
-  return itertools.izip_longest(
+  return itertools.zip_longest(
       lines, itertools.islice(lines, 1, None), fillvalue=None)
 
 
@@ -191,14 +191,14 @@ def diff_output(output1, output2, allowed, ignore1, ignore2):
       return all(not e.match(line) for e in ignore)
     return fun
 
-  lines1 = filter(useful_line(ignore1), output1)
-  lines2 = filter(useful_line(ignore2), output2)
+  lines1 = list(filter(useful_line(ignore1), output1))
+  lines2 = list(filter(useful_line(ignore2), output2))
 
   # This keeps track where we are in the original source file of the fuzz
   # test case.
   source = None
 
-  for ((line1, lookahead1), (line2, lookahead2)) in itertools.izip_longest(
+  for ((line1, lookahead1), (line2, lookahead2)) in itertools.zip_longest(
       line_pairs(lines1), line_pairs(lines2), fillvalue=(None, None)):
 
     # Only one of the two iterators should run out.
@@ -284,13 +284,13 @@ class V8Suppression(Suppression):
       # Search the whole test case if preamble can't be found. E.g. older
       # already minimized test cases might have dropped the delimiter line.
       content = testcase
-    for bug, exp in IGNORE_TEST_CASES.iteritems():
+    for bug, exp in IGNORE_TEST_CASES.items():
       if exp.search(content):
         return bug
     return False
 
   def ignore_by_metadata(self, metadata):
-    for bug, sources in IGNORE_SOURCES.iteritems():
+    for bug, sources in IGNORE_SOURCES.items():
       for source in sources:
         if source in metadata['sources']:
           return bug
@@ -304,7 +304,7 @@ class V8Suppression(Suppression):
 
   def ignore_by_output(self, output, arch, config):
     def check(mapping):
-      for bug, exp in mapping.iteritems():
+      for bug, exp in mapping.items():
         if exp.search(output):
           return bug
       return None

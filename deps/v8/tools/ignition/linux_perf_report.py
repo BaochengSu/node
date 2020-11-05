@@ -152,7 +152,7 @@ def calculate_samples_count_per_callchain(callchains):
   for callchain in callchains:
     key = ";".join(reversed(callchain))
     chain_counters[key] += 1
-  return chain_counters.items()
+  return list(chain_counters.items())
 
 
 def calculate_samples_count_per_handler(callchains):
@@ -163,7 +163,7 @@ def calculate_samples_count_per_handler(callchains):
   for callchain in callchains:
     handler = strip_handler_prefix_if_any(callchain[-1])
     handler_counters[handler] += 1
-  return handler_counters.items()
+  return list(handler_counters.items())
 
 
 def write_flamegraph_input_file(output_stream, callchains):

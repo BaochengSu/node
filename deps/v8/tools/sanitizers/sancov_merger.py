@@ -100,13 +100,13 @@ def generate_inputs(keep, coverage_dir, file_map, cpus):
   Returns: List of args as expected by merge above.
   """
   inputs = []
-  for executable, files in file_map.iteritems():
+  for executable, files in file_map.items():
     # What's the bucket size for distributing files for merging? E.g. with
     # 2 cpus and 9 files we want bucket size 5.
     n = max(2, int(math.ceil(len(files) / float(cpus))))
 
     # Chop files into buckets.
-    buckets = [files[i:i+n] for i in xrange(0, len(files), n)]
+    buckets = [files[i:i+n] for i in range(0, len(files), n)]
 
     # Inputs for multiprocessing. List of tuples containing:
     # Keep-files option, base path, executable name, index of bucket,
@@ -150,7 +150,7 @@ def merge_test_runner_output(options):
   # The final result has index None, so no index will appear in the
   # file name.
   inputs = [(options.keep, options.coverage_dir, executable, None, files)
-             for executable, files in file_map.iteritems()]
+             for executable, files in file_map.items()]
 
   logging.info('Merging %d intermediate results.' % len(inputs))
 

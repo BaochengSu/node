@@ -74,7 +74,7 @@ def main(argv):
 
   list_of_files = []
   def add_files_from_globs(globs):
-    list_of_files.extend(itertools.chain(*map(glob.iglob, globs)))
+    list_of_files.extend(itertools.chain(*list(map(glob.iglob, globs))))
 
   # Add toplevel executables, supplementary files and libraries.
   extended_executable_files = [

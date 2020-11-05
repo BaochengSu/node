@@ -90,7 +90,7 @@ def Strip(f):
 
 def MakeArgs(l):
   """['-a', '', 'abc', ''] -> '-a abc'"""
-  return " ".join(filter(None, l))
+  return " ".join([_f for _f in l if _f])
 
 
 def Quoted(s):
@@ -122,8 +122,8 @@ class GitRecipesMixin(object):
     self.Git(MakeArgs(["stash"]), **kwargs)
 
   def GitRemotes(self, **kwargs):
-    return map(str.strip,
-               self.Git(MakeArgs(["branch -r"]), **kwargs).splitlines())
+    return list(map(str.strip,
+               self.Git(MakeArgs(["branch -r"]), **kwargs).splitlines()))
 
   def GitCheckout(self, name, **kwargs):
     assert name
@@ -148,7 +148,7 @@ class GitRecipesMixin(object):
       files = self.Git(MakeArgs(["diff --name-only",
                                  git_hash,
                                  "%s^" % git_hash]), **kwargs)
-      return map(str.strip, files.splitlines())
+      return list(map(str.strip, files.splitlines()))
     except GitFailedException:  # pragma: no cover
       # Git fails using "^" at branch roots.
       return []

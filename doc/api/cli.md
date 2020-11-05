@@ -412,6 +412,17 @@ added: v8.15.0
 
 Specify the maximum size, in bytes, of HTTP headers. Defaults to 8KB.
 
+### `--insecure-http-parser`
+<!-- YAML
+added: REPLACEME
+-->
+
+Use an insecure HTTP parser that accepts invalid HTTP headers. This may allow
+interoperability with non-conformant HTTP implementations. It may also allow
+request smuggling and other HTTP attacks that rely on invalid headers being
+accepted. Avoid using this option.
+
+
 ## Environment Variables
 
 ### `NODE_DEBUG=module[,…]`

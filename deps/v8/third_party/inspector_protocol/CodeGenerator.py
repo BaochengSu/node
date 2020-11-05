@@ -28,16 +28,19 @@ def read_config():
     # pylint: disable=W0703
     def json_to_object(data, output_base, config_base):
         def json_object_hook(object_dict):
-            items = [(k, os.path.join(config_base, v) if k == "path" else v) for (k, v) in object_dict.items()]
+            items = [(k, os.path.join(config_base, v) if k == "path" else v) for (k, v) in list(object_dict.items())]
             items = [(k, os.path.join(output_base, v) if k == "output" else v) for (k, v) in items]
-            keys, values = zip(*items)
+            keys, values = list(zip(*items))
+            # 'async' is a keyword since Python 3.7.
+            # Avoid namedtuple(rename=True) for compatibility with Python 2.X.
+            keys = tuple('async_' if k == 'async' else k for k in keys)
             return collections.namedtuple('X', keys)(*values)
         return json.loads(data, object_hook=json_object_hook)
 
     def init_defaults(config_tuple, path, defaults):
         keys = list(config_tuple._fields)  # pylint: disable=E1101
         values = [getattr(config_tuple, k) for k in keys]
-        for i in xrange(len(keys)):
+        for i in range(len(keys)):
             if hasattr(values[i], "_fields"):
                 values[i] = init_defaults(values[i], path + "." + keys[i], defaults)
         for optional in defaults:
@@ -127,7 +130,7 @@ def dash_to_camelcase(word):
 
 
 def to_snake_case(name):
-    return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", name, sys.maxint).lower()
+    return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", name, sys.maxsize).lower()
 
 
 def to_method_case(config, name):
@@ -443,7 +446,7 @@ class Protocol(object):
     def is_async_command(self, domain, command):
         if not self.config.protocol.options:
             return False
-        return self.check_options(self.config.protocol.options, domain, command, "async", None, False)
+        return self.check_options(self.config.protocol.options, domain, command, "async_", None, False)
 
 
     def is_exported(self, domain, name):
@@ -574,16 +577,16 @@ def main():
         generate_lib_file(os.path.join(config.lib.output, to_file_name(config, "Protocol.cpp")), lib_cpp_templates)
 
     # Make gyp / make generatos happy, otherwise make rebuilds world.
-    inputs_ts = max(map(os.path.getmtime, inputs))
+    inputs_ts = max(list(map(os.path.getmtime, inputs)))
     up_to_date = True
-    for output_file in outputs.iterkeys():
+    for output_file in outputs.keys():
         if not os.path.exists(output_file) or os.path.getmtime(output_file) < inputs_ts:
             up_to_date = False
             break
     if up_to_date:
         sys.exit()
 
-    for file_name, content in outputs.iteritems():
+    for file_name, content in outputs.items():
         out_file = open(file_name, "w")
         out_file.write(content)
         out_file.close()

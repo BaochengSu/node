@@ -57,7 +57,7 @@ def ProcessLogFile(filename, options):
       logreader = csv.reader(logfile)
 
       print('JOB "v8"')
-      print('DATE "%s"' % time.asctime(time.localtime()))
+      print(('DATE "%s"' % time.asctime(time.localtime())))
       print('SAMPLE_UNIT "seconds"')
       print('VALUE_UNIT "bytes"')
 
@@ -67,18 +67,18 @@ def ProcessLogFile(filename, options):
           if first_call_time == None:
             first_call_time = sample_time
           sample_time -= first_call_time
-          print('BEGIN_SAMPLE %.2f' % sample_time)
+          print(('BEGIN_SAMPLE %.2f' % sample_time))
           sampling = True
         elif row[0] == 'heap-sample-end' and row[1] == 'Heap':
-          print('END_SAMPLE %.2f' % sample_time)
+          print(('END_SAMPLE %.2f' % sample_time))
           sampling = False
         elif row[0] == itemname and sampling:
-          print(row[1]),
+          print((row[1]), end=' ')
           if options.count:
-            print('%d' % (int(row[2]))),
+            print(('%d' % (int(row[2]))), end=' ')
           if options.size:
-            print('%d' % (int(row[3]))),
-          print
+            print(('%d' % (int(row[3]))), end=' ')
+          print()
     finally:
       logfile.close()
   except:
@@ -110,7 +110,7 @@ def Main():
     sys.exit();
 
   if not args:
-    print "Missing logfile"
+    print("Missing logfile")
     sys.exit();
 
   ProcessLogFile(args[0], options)

@@ -7,7 +7,7 @@ import argparse
 import os
 import sys
 import tempfile
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 from common_includes import *
 
@@ -27,7 +27,7 @@ class PrepareBranchRevision(Step):
     self["push_hash"] = (self._options.revision or
                          self.GitLog(n=1, format="%H", branch="origin/master"))
     assert self["push_hash"]
-    print "Release revision %s" % self["push_hash"]
+    print("Release revision %s" % self["push_hash"])
 
 
 class IncrementVersion(Step):
@@ -64,7 +64,7 @@ class IncrementVersion(Step):
                                     self["new_minor"],
                                     self["new_build"])
 
-    print ("Incremented version to %s" % self["version"])
+    print(("Incremented version to %s" % self["version"]))
 
 
 class DetectLastRelease(Step):
@@ -138,7 +138,7 @@ class PushBranchRef(Step):
   def RunStep(self):
     cmd = "push origin %s:refs/heads/%s" % (self["push_hash"], self["version"])
     if self._options.dry_run:
-      print "Dry run. Command:\ngit %s" % cmd
+      print("Dry run. Command:\ngit %s" % cmd)
     else:
       self.Git(cmd)
 
@@ -217,7 +217,7 @@ class LandBranch(Step):
 
   def RunStep(self):
     if self._options.dry_run:
-      print "Dry run - upload CL."
+      print("Dry run - upload CL.")
     else:
       self.GitUpload(author=self._options.author,
                      force=True,
@@ -225,7 +225,7 @@ class LandBranch(Step):
                      private=True)
     cmd = "cl land --bypass-hooks -f"
     if self._options.dry_run:
-      print "Dry run. Command:\ngit %s" % cmd
+      print("Dry run. Command:\ngit %s" % cmd)
     else:
       self.Git(cmd)
 
@@ -235,8 +235,8 @@ class TagRevision(Step):
 
   def RunStep(self):
     if self._options.dry_run:
-      print ("Dry run. Tagging \"%s\" with %s" %
-             (self["commit_title"], self["version"]))
+      print(("Dry run. Tagging \"%s\" with %s" %
+             (self["commit_title"], self["version"])))
     else:
       self.vc.Tag(self["version"],
                   "origin/%s" % self["version"],
@@ -247,8 +247,8 @@ class CleanUp(Step):
   MESSAGE = "Done!"
 
   def RunStep(self):
-    print("Congratulations, you have successfully created version %s."
-          % self["version"])
+    print(("Congratulations, you have successfully created version %s."
+          % self["version"]))
 
     self.GitCheckout("origin/master")
     self.DeleteBranch("work-branch")
@@ -269,7 +269,7 @@ class CreateRelease(ScriptsBase):
 
   def _ProcessOptions(self, options):  # pragma: no cover
     if not options.author or not options.reviewer:
-      print "Reviewer (-r) and author (-a) are required."
+      print("Reviewer (-r) and author (-a) are required.")
       return False
     return True
 

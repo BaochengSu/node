@@ -152,7 +152,7 @@ class NetworkedRunner(execution.Runner):
     except KeyboardInterrupt:
       self.terminate = True
       raise
-    except Exception, _e:
+    except Exception as _e:
       # If there's an exception we schedule an interruption for any
       # remaining threads...
       self.terminate = True
@@ -188,14 +188,14 @@ class NetworkedRunner(execution.Runner):
             if test_id < 0:
               # The peer is reporting an error.
               with self.lock:
-                print("\nPeer %s reports error: %s" % (peer.address, data[1]))
+                print(("\nPeer %s reports error: %s" % (peer.address, data[1])))
               continue
             test = test_map.pop(test_id)
             test.MergeResult(data)
             try:
               self.perfdata.UpdatePerfData(test)
-            except Exception, e:
-              print("UpdatePerfData exception: %s" % e)
+            except Exception as e:
+              print(("UpdatePerfData exception: %s" % e))
               pass  # Just keep working.
             with self.lock:
               perf_key = self.perfdata.GetKey(test)
@@ -217,8 +217,8 @@ class NetworkedRunner(execution.Runner):
       except KeyboardInterrupt:
         sock.close()
         raise
-      except Exception, e:
-        print("Got exception: %s" % e)
+      except Exception as e:
+        print(("Got exception: %s" % e))
         pass  # Fall back to local execution.
     else:
       compression.Send([constants.UNRESPONSIVE_PEER, peer.address],
@@ -226,7 +226,7 @@ class NetworkedRunner(execution.Runner):
     sock.close()
     if len(test_map) > 0:
       # Some tests have not received any results. Run them locally.
-      print("\nNo results for %d tests, running them locally." % len(test_map))
+      print(("\nNo results for %d tests, running them locally." % len(test_map)))
       self._EnqueueLocally(test_map)
 
   def _EnqueueLocally(self, test_map):

@@ -115,6 +115,13 @@ Set the host:port to be used when the inspector is activated.
 Specify the maximum size of HTTP headers in bytes. Defaults to 8KB.
 
 .TP
+.BR \-\-insecure\-http\-parser
+Use an insecure HTTP parser that accepts invalid HTTP headers. This may allow
+interoperability with non-conformant HTTP implementations. It may also allow
+request smuggling and other HTTP attacks that rely on invalid headers being
+accepted. Avoid using this option.
+
+.TP
 .BR \-\-no\-deprecation
 Silence deprecation warnings.
 

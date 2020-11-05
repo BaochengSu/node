@@ -28,7 +28,7 @@ def PrintHelpAndExit():
 
 
 def _Call(cmd, silent=False):
-  if not silent: print("# %s" % cmd)
+  if not silent: print(("# %s" % cmd))
   return subprocess.call(cmd, shell=True)
 
 
@@ -46,7 +46,7 @@ def ParseArguments(argv):
     if argstring in ("-h", "--help", "help"):
       PrintHelpAndExit()
     if argstring not in ARCHES:
-      print("Invalid argument: %s" % argstring)
+      print(("Invalid argument: %s" % argstring))
       sys.exit(1)
     user_arches.append(argstring)
 

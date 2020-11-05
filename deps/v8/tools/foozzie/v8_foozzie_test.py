@@ -22,12 +22,12 @@ class UnitTest(unittest.TestCase):
     one = ''
     two = ''
     diff = None, None
-    self.assertEquals(diff, suppress.diff(one, two))
+    self.assertEqual(diff, suppress.diff(one, two))
 
     one = 'a \n  b\nc();'
     two = 'a \n  b\nc();'
     diff = None, None
-    self.assertEquals(diff, suppress.diff(one, two))
+    self.assertEqual(diff, suppress.diff(one, two))
 
     # Ignore line before caret, caret position and error message.
     one = """
@@ -45,7 +45,7 @@ somefile.js: TypeError: baz is not a function
   undefined
 """
     diff = None, None
-    self.assertEquals(diff, suppress.diff(one, two))
+    self.assertEqual(diff, suppress.diff(one, two))
 
     one = """
 Still equal
@@ -55,7 +55,7 @@ Extra line
 Still equal
 """
     diff = '- Extra line', None
-    self.assertEquals(diff, suppress.diff(one, two))
+    self.assertEqual(diff, suppress.diff(one, two))
 
     one = """
 Still equal
@@ -65,7 +65,7 @@ Still equal
 Extra line
 """
     diff = '+ Extra line', None
-    self.assertEquals(diff, suppress.diff(one, two))
+    self.assertEqual(diff, suppress.diff(one, two))
 
     one = """
 undefined
@@ -77,7 +77,7 @@ otherfile.js: TypeError: undefined is not a constructor
 """
     diff = """- somefile.js: TypeError: undefined is not a constructor
 + otherfile.js: TypeError: undefined is not a constructor""", None
-    self.assertEquals(diff, suppress.diff(one, two))
+    self.assertEqual(diff, suppress.diff(one, two))
 
 
 def cut_verbose_output(stdout):
@@ -99,7 +99,7 @@ def run_foozzie(first_d8, second_d8):
 class SystemTest(unittest.TestCase):
   def testSyntaxErrorDiffPass(self):
     stdout = run_foozzie('test_d8_1.py', 'test_d8_2.py')
-    self.assertEquals('# V8 correctness - pass\n', cut_verbose_output(stdout))
+    self.assertEqual('# V8 correctness - pass\n', cut_verbose_output(stdout))
 
   def testDifferentOutputFail(self):
     with open(os.path.join(TEST_DATA, 'failure_output.txt')) as f:
@@ -107,5 +107,5 @@ class SystemTest(unittest.TestCase):
     with self.assertRaises(subprocess.CalledProcessError) as ctx:
       run_foozzie('test_d8_1.py', 'test_d8_3.py')
     e = ctx.exception
-    self.assertEquals(v8_foozzie.RETURN_FAIL, e.returncode)
-    self.assertEquals(expected_output, cut_verbose_output(e.output))
+    self.assertEqual(v8_foozzie.RETURN_FAIL, e.returncode)
+    self.assertEqual(expected_output, cut_verbose_output(e.output))

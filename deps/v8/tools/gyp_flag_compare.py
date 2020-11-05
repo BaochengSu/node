@@ -89,7 +89,7 @@ def GetFlags(lines, build_dir):
                                           x.endswith('.c') or
                                           x.endswith('.cpp')]
     if len(cc_file) != 1:
-      print 'Skipping %s' % command_line
+      print('Skipping %s' % command_line)
       continue
     assert len(cc_file) == 1
 
@@ -191,34 +191,34 @@ def Run(command_line):
     return subprocess.check_output(command_line, shell=True)
   except subprocess.CalledProcessError as e:
     # Rescue the output we got until the exception happened.
-    print '#### Stdout: ####################################################'
-    print e.output
-    print '#################################################################'
+    print('#### Stdout: ####################################################')
+    print(e.output)
+    print('#################################################################')
     raise
 
 
 def main():
   if len(sys.argv) < 4:
-    print ('usage: %s gn_outdir gyp_outdir gn_target '
-           '[gyp_target1, gyp_target2, ...]' % __file__)
+    print(('usage: %s gn_outdir gyp_outdir gn_target '
+           '[gyp_target1, gyp_target2, ...]' % __file__))
     return 1
 
   if len(sys.argv) == 4:
     sys.argv.append(sys.argv[3])
   gn_out_dir = sys.argv[1]
-  print >> sys.stderr, 'Expecting gn outdir in %s...' % gn_out_dir
+  print('Expecting gn outdir in %s...' % gn_out_dir, file=sys.stderr)
   gn = Run('ninja -C %s -t commands %s' % (gn_out_dir, sys.argv[3]))
   if sys.platform == 'win32':
     # On Windows flags are stored in .rsp files which are created during build.
-    print >> sys.stderr, 'Building in %s...' % gn_out_dir
+    print('Building in %s...' % gn_out_dir, file=sys.stderr)
     Run('ninja -C %s -d keeprsp %s' % (gn_out_dir, sys.argv[3]))
 
   gyp_out_dir = sys.argv[2]
-  print >> sys.stderr, 'Expecting gyp outdir in %s...' % gyp_out_dir
+  print('Expecting gyp outdir in %s...' % gyp_out_dir, file=sys.stderr)
   gyp = Run('ninja -C %s -t commands %s' % (gyp_out_dir, " ".join(sys.argv[4:])))
   if sys.platform == 'win32':
     # On Windows flags are stored in .rsp files which are created during build.
-    print >> sys.stderr, 'Building in %s...' % gyp_out_dir
+    print('Building in %s...' % gyp_out_dir, file=sys.stderr)
     Run('ninja -C %s -d keeprsp %s' % (gyp_out_dir, " ".join(sys.argv[4:])))
 
   all_gyp_flags = GetFlags(gyp.splitlines(),
@@ -229,12 +229,12 @@ def main():
   gn_files = set(all_gn_flags.keys())
   different_source_list = gyp_files != gn_files
   if different_source_list:
-    print 'Different set of sources files:'
-    print '  In gyp, not in GN:\n    %s' % '\n    '.join(
-        sorted(gyp_files - gn_files))
-    print '  In GN, not in gyp:\n    %s' % '\n    '.join(
-        sorted(gn_files - gyp_files))
-    print '\nNote that flags will only be compared for files in both sets.\n'
+    print('Different set of sources files:')
+    print('  In gyp, not in GN:\n    %s' % '\n    '.join(
+        sorted(gyp_files - gn_files)))
+    print('  In GN, not in gyp:\n    %s' % '\n    '.join(
+        sorted(gn_files - gyp_files)))
+    print('\nNote that flags will only be compared for files in both sets.\n')
   file_list = gyp_files & gn_files
   files_with_given_differences = {}
   for filename in sorted(file_list):
@@ -267,11 +267,11 @@ def main():
     if differences:
       files_with_given_differences.setdefault(differences, []).append(filename)
 
-  for diff, files in files_with_given_differences.iteritems():
-    print '\n'.join(sorted(files))
-    print diff
+  for diff, files in files_with_given_differences.items():
+    print('\n'.join(sorted(files)))
+    print(diff)
 
-  print 'Total differences:', g_total_differences
+  print('Total differences:', g_total_differences)
   # TODO(scottmg): Return failure on difference once we're closer to identical.
   return 0
 

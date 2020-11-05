@@ -197,6 +197,7 @@ typedef intptr_t ssize_t;
 namespace node {
 
 NODE_EXTERN extern bool no_deprecation;
+NODE_EXTERN extern bool insecure_http_parser;
 #if HAVE_OPENSSL
 NODE_EXTERN extern bool ssl_openssl_cert_store;
 # if NODE_FIPS_MODE

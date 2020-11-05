@@ -28,7 +28,7 @@
 
 import multiprocessing
 import os
-import Queue
+import queue
 import threading
 import time
 
@@ -113,7 +113,7 @@ def Execute(workspace, ctx, tests, sock, server):
   runner = execution.Runner(suites, progress_indicator, ctx)
   try:
     runner.Run(server.jobs)
-  except IOError, e:
+  except IOError as e:
     if e.errno == 2:
       message = ("File not found: %s, maybe you forgot to 'git add' it?" %
                  e.filename)

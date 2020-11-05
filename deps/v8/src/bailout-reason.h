@@ -127,6 +127,8 @@ namespace internal {
     "Unexpected fall-through from string comparison")                          \
   V(kUnexpectedFallthroughToCharCodeAtSlowCase,                                \
     "Unexpected fallthrough to CharCodeAt slow case")                          \
+  V(kUnexpectedFPUStackDepthAfterInstruction,                                  \
+    "Unexpected FPU stack depth after instruction")                            \
   V(kUnexpectedInitialMapForArrayFunction1,                                    \
     "Unexpected initial map for Array function (1)")                           \
   V(kUnexpectedInitialMapForArrayFunction2,                                    \

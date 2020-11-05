@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from __future__ import print_function
+
 
 import itertools
 import os
@@ -84,7 +84,7 @@ EXE = r'''
 '''
 
 def version(tag):
-  return map(int, re.match('^v(\d+)\.(\d+)\.(\d+)', tag).groups())
+  return list(map(int, re.match('^v(\d+)\.(\d+)\.(\d+)', tag).groups()))
 
 def major_minor(tag):
   return version(tag)[:2]

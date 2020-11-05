@@ -74,6 +74,10 @@ const uint32_t kOnMessageComplete = 3;
 const uint32_t kOnExecute = 4;
 
 
+inline bool IsOWS(char c) {
+  return c == ' ' || c == '\t';
+}
+
 // helper class for the Parser
 struct StringPtr {
   StringPtr() {
@@ -133,10 +137,19 @@ struct StringPtr {
 
 
   Local<String> ToString(Environment* env) const {
-    if (str_)
+    if (size_ != 0)
       return OneByteString(env->isolate(), str_, size_);
     else
       return String::Empty(env->isolate());
+  }
+
+
+  // Strip trailing OWS (SPC or HTAB) from string.
+  Local<String> ToTrimmedString(Environment* env) {
+    while (size_ > 0 && IsOWS(str_[size_ - 1])) {
+      size_--;
+    }
+    return ToString(env);
   }
 
 
@@ -148,12 +161,12 @@ struct StringPtr {
 
 class Parser : public AsyncWrap {
  public:
-  Parser(Environment* env, Local<Object> wrap, enum http_parser_type type)
+  Parser(Environment* env, Local<Object> wrap, enum http_parser_type type, bool lenient)
       : AsyncWrap(env, wrap, AsyncWrap::PROVIDER_HTTPPARSER),
         current_buffer_len_(0),
         current_buffer_data_(nullptr) {
     Wrap(object(), this);
-    Init(type);
+    Init(type, lenient);
   }
 
 
@@ -370,7 +383,7 @@ class Parser : public AsyncWrap {
     http_parser_type type =
         static_cast<http_parser_type>(args[0]->Int32Value());
     CHECK(type == HTTP_REQUEST || type == HTTP_RESPONSE);
-    new Parser(env, args.This(), type);
+    new Parser(env, args.This(), type, args[1]->IsTrue());
   }
 
 
@@ -463,6 +476,7 @@ class Parser : public AsyncWrap {
 
   static void Reinitialize(const FunctionCallbackInfo<Value>& args) {
     Environment* env = Environment::GetCurrent(args);
+    bool lenient = args[2]->IsTrue();
 
     CHECK(args[0]->IsInt32());
     CHECK(args[1]->IsBoolean());
@@ -481,7 +495,7 @@ class Parser : public AsyncWrap {
     if (isReused) {
       parser->AsyncReset();
     }
-    parser->Init(type);
+    parser->Init(type, lenient);
   }
 
 
@@ -685,7 +699,7 @@ class Parser : public AsyncWrap {
       size_t j = 0;
       while (i < num_values_ && j < arraysize(argv) / 2) {
         argv[j * 2] = fields_[i].ToString(env());
-        argv[j * 2 + 1] = values_[i].ToString(env());
+        argv[j * 2 + 1] = values_[i].ToTrimmedString(env());
         i++;
         j++;
       }
@@ -725,8 +739,9 @@ class Parser : public AsyncWrap {
   }
 
 
-  void Init(enum http_parser_type type) {
+  void Init(enum http_parser_type type, bool lenient) {
     http_parser_init(&parser_, type);
+    parser_.lenient_http_headers = lenient;
     url_.Reset();
     status_message_.Reset();
     num_fields_ = 0;

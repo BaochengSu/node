@@ -74,9 +74,9 @@ AUTO_PUSH_ARGS = [
 
 class ToplevelTest(unittest.TestCase):
   def testSaniniziteVersionTags(self):
-    self.assertEquals("4.8.230", SanitizeVersionTag("4.8.230"))
-    self.assertEquals("4.8.230", SanitizeVersionTag("tags/4.8.230"))
-    self.assertEquals(None, SanitizeVersionTag("candidate"))
+    self.assertEqual("4.8.230", SanitizeVersionTag("4.8.230"))
+    self.assertEqual("4.8.230", SanitizeVersionTag("tags/4.8.230"))
+    self.assertEqual(None, SanitizeVersionTag("candidate"))
 
   def testNormalizeVersionTags(self):
     input = ["4.8.230",
@@ -95,50 +95,50 @@ class ToplevelTest(unittest.TestCase):
                 "4.8.223",
                 "4.8.231",
                 ]
-    self.assertEquals(expected, NormalizeVersionTags(input))
+    self.assertEqual(expected, NormalizeVersionTags(input))
 
   def testSortBranches(self):
     S = releases.SortBranches
-    self.assertEquals(["3.1", "2.25"], S(["2.25", "3.1"])[0:2])
-    self.assertEquals(["3.0", "2.25"], S(["2.25", "3.0", "2.24"])[0:2])
-    self.assertEquals(["3.11", "3.2"], S(["3.11", "3.2", "2.24"])[0:2])
+    self.assertEqual(["3.1", "2.25"], S(["2.25", "3.1"])[0:2])
+    self.assertEqual(["3.0", "2.25"], S(["2.25", "3.0", "2.24"])[0:2])
+    self.assertEqual(["3.11", "3.2"], S(["3.11", "3.2", "2.24"])[0:2])
 
   def testFilterDuplicatesAndReverse(self):
     F = releases.FilterDuplicatesAndReverse
-    self.assertEquals([], F([]))
-    self.assertEquals([["100", "10"]], F([["100", "10"]]))
-    self.assertEquals([["99", "9"], ["100", "10"]],
+    self.assertEqual([], F([]))
+    self.assertEqual([["100", "10"]], F([["100", "10"]]))
+    self.assertEqual([["99", "9"], ["100", "10"]],
                       F([["100", "10"], ["99", "9"]]))
-    self.assertEquals([["98", "9"], ["100", "10"]],
+    self.assertEqual([["98", "9"], ["100", "10"]],
                       F([["100", "10"], ["99", "9"], ["98", "9"]]))
-    self.assertEquals([["98", "9"], ["99", "10"]],
+    self.assertEqual([["98", "9"], ["99", "10"]],
                       F([["100", "10"], ["99", "10"], ["98", "9"]]))
 
   def testBuildRevisionRanges(self):
     B = releases.BuildRevisionRanges
-    self.assertEquals({}, B([]))
-    self.assertEquals({"10": "100"}, B([["100", "10"]]))
-    self.assertEquals({"10": "100", "9": "99:99"},
+    self.assertEqual({}, B([]))
+    self.assertEqual({"10": "100"}, B([["100", "10"]]))
+    self.assertEqual({"10": "100", "9": "99:99"},
                       B([["100", "10"], ["99", "9"]]))
-    self.assertEquals({"10": "100", "9": "97:99"},
+    self.assertEqual({"10": "100", "9": "97:99"},
                       B([["100", "10"], ["98", "9"], ["97", "9"]]))
-    self.assertEquals({"10": "100", "9": "99:99", "3": "91:98"},
+    self.assertEqual({"10": "100", "9": "99:99", "3": "91:98"},
                       B([["100", "10"], ["99", "9"], ["91", "3"]]))
-    self.assertEquals({"13": "101", "12": "100:100", "9": "94:97",
+    self.assertEqual({"13": "101", "12": "100:100", "9": "94:97",
                        "3": "91:93, 98:99"},
                       B([["101", "13"], ["100", "12"], ["98", "3"],
                          ["94", "9"], ["91", "3"]]))
 
   def testMakeComment(self):
-    self.assertEquals("#   Line 1\n#   Line 2\n#",
+    self.assertEqual("#   Line 1\n#   Line 2\n#",
                       MakeComment("    Line 1\n    Line 2\n"))
-    self.assertEquals("#Line 1\n#Line 2",
+    self.assertEqual("#Line 1\n#Line 2",
                       MakeComment("Line 1\n Line 2"))
 
   def testStripComments(self):
-    self.assertEquals("    Line 1\n    Line 3\n",
+    self.assertEqual("    Line 1\n    Line 3\n",
         StripComments("    Line 1\n#   Line 2\n    Line 3\n#\n"))
-    self.assertEquals("\nLine 2 ### Test\n #",
+    self.assertEqual("\nLine 2 ### Test\n #",
         StripComments("###\n# \n\n#  Line 1\nLine 2 ### Test\n #"))
 
   def testMakeChangeLogBodySimple(self):
@@ -150,14 +150,14 @@ class ToplevelTest(unittest.TestCase):
            "Title text 2\n\nBUG=1234\n",
            "author2@chromium.org"],
         ]
-    self.assertEquals("        Title text 1.\n"
+    self.assertEqual("        Title text 1.\n"
                       "        (author1@chromium.org)\n\n"
                       "        Title text 2 (Chromium issue 1234).\n"
                       "        (author2@chromium.org)\n\n",
                       MakeChangeLogBody(commits))
 
   def testMakeChangeLogBodyEmpty(self):
-    self.assertEquals("", MakeChangeLogBody([]))
+    self.assertEqual("", MakeChangeLogBody([]))
 
   def testMakeChangeLogBodyAutoFormat(self):
     commits = [
@@ -174,7 +174,7 @@ class ToplevelTest(unittest.TestCase):
            "Title text 4\n\nBUG=1234\nLOG=\n",
            "author4@chromium.org"],
         ]
-    self.assertEquals("        Title text 1.\n\n"
+    self.assertEqual("        Title text 1.\n\n"
                       "        Title text 3 (Chromium issue 1234).\n\n",
                       MakeChangeLogBody(commits, True))
 
@@ -187,22 +187,22 @@ R=verwaest@chromium.org
 
 Committed: https://code.google.com/p/v8/source/detail?r=18210
 """
-    self.assertEquals("", MakeChangeLogBody([["title", body, "author"]], True))
+    self.assertEqual("", MakeChangeLogBody([["title", body, "author"]], True))
 
   def testMakeChangeLogBugReferenceEmpty(self):
-    self.assertEquals("", MakeChangeLogBugReference(""))
-    self.assertEquals("", MakeChangeLogBugReference("LOG="))
-    self.assertEquals("", MakeChangeLogBugReference(" BUG ="))
-    self.assertEquals("", MakeChangeLogBugReference("BUG=none\t"))
+    self.assertEqual("", MakeChangeLogBugReference(""))
+    self.assertEqual("", MakeChangeLogBugReference("LOG="))
+    self.assertEqual("", MakeChangeLogBugReference(" BUG ="))
+    self.assertEqual("", MakeChangeLogBugReference("BUG=none\t"))
 
   def testMakeChangeLogBugReferenceSimple(self):
-    self.assertEquals("(issue 987654)",
+    self.assertEqual("(issue 987654)",
                       MakeChangeLogBugReference("BUG = v8:987654"))
-    self.assertEquals("(Chromium issue 987654)",
+    self.assertEqual("(Chromium issue 987654)",
                       MakeChangeLogBugReference("BUG=987654 "))
 
   def testMakeChangeLogBugReferenceFromBody(self):
-    self.assertEquals("(Chromium issue 1234567)",
+    self.assertEqual("(Chromium issue 1234567)",
                       MakeChangeLogBugReference("Title\n\nTBR=\nBUG=\n"
                                                 " BUG=\tchromium:1234567\t\n"
                                                 "R=somebody\n"))
@@ -210,25 +210,25 @@ Committed: https://code.google.com/p/v8/source/detail?r=18210
   def testMakeChangeLogBugReferenceMultiple(self):
     # All issues should be sorted and grouped. Multiple references to the same
     # issue should be filtered.
-    self.assertEquals("(issues 123, 234, Chromium issue 345)",
+    self.assertEqual("(issues 123, 234, Chromium issue 345)",
                       MakeChangeLogBugReference("Title\n\n"
                                                 "BUG=v8:234\n"
                                                 "  BUG\t= 345, \tv8:234,\n"
                                                 "BUG=v8:123\n"
                                                 "R=somebody\n"))
-    self.assertEquals("(Chromium issues 123, 234)",
+    self.assertEqual("(Chromium issues 123, 234)",
                       MakeChangeLogBugReference("Title\n\n"
                                                 "BUG=234,,chromium:123 \n"
                                                 "R=somebody\n"))
-    self.assertEquals("(Chromium issues 123, 234)",
+    self.assertEqual("(Chromium issues 123, 234)",
                       MakeChangeLogBugReference("Title\n\n"
                                                 "BUG=chromium:234, , 123\n"
                                                 "R=somebody\n"))
-    self.assertEquals("(issues 345, 456)",
+    self.assertEqual("(issues 345, 456)",
                       MakeChangeLogBugReference("Title\n\n"
                                                 "\t\tBUG=v8:345,v8:456\n"
                                                 "R=somebody\n"))
-    self.assertEquals("(issue 123, Chromium issues 345, 456)",
+    self.assertEqual("(issue 123, Chromium issues 345, 456)",
                       MakeChangeLogBugReference("Title\n\n"
                                                 "BUG=chromium:456\n"
                                                 "BUG = none\n"
@@ -239,7 +239,7 @@ Committed: https://code.google.com/p/v8/source/detail?r=18210
   # done later.
   def testMakeChangeLogBugReferenceLong(self):
     # -----------------00--------10--------20--------30--------
-    self.assertEquals("(issues 234, 1234567890, 1234567"
+    self.assertEqual("(issues 234, 1234567890, 1234567"
                       "8901234567890, Chromium issues 12345678,"
                       " 123456789)",
                       MakeChangeLogBugReference("BUG=v8:234\n"
@@ -248,7 +248,7 @@ Committed: https://code.google.com/p/v8/source/detail?r=18210
                                                 "BUG=123456789\n"
                                                 "BUG=12345678\n"))
     # -----------------00--------10--------20--------30--------
-    self.assertEquals("(issues 234, 1234567890, 1234567"
+    self.assertEqual("(issues 234, 1234567890, 1234567"
                       "8901234567890, Chromium issues"
                       " 123456789, 1234567890)",
                       MakeChangeLogBugReference("BUG=v8:234\n"
@@ -257,7 +257,7 @@ Committed: https://code.google.com/p/v8/source/detail?r=18210
                                                 "BUG=123456789\n"
                                                 "BUG=1234567890\n"))
     # -----------------00--------10--------20--------30--------
-    self.assertEquals("(Chromium issues 234, 1234567890"
+    self.assertEqual("(Chromium issues 234, 1234567890"
                       ", 12345678901234567, "
                       "1234567890123456789)",
                       MakeChangeLogBugReference("BUG=234\n"
@@ -417,11 +417,11 @@ class ScriptTest(unittest.TestCase):
     return script(TEST_CONFIG, self, self._state).RunSteps([step_class], args)
 
   def Call(self, fun, *args, **kwargs):
-    print "Calling %s with %s and %s" % (str(fun), str(args), str(kwargs))
+    print("Calling %s with %s and %s" % (str(fun), str(args), str(kwargs)))
 
   def Command(self, cmd, args="", prefix="", pipe=True, cwd=None):
-    print "%s %s" % (cmd, args)
-    print "in %s" % cwd
+    print("%s %s" % (cmd, args))
+    print("in %s" % cwd)
     return self._mock.Call("command", cmd + " " + args, cwd=cwd)
 
   def ReadLine(self):
@@ -468,8 +468,8 @@ class ScriptTest(unittest.TestCase):
   def testGitMock(self):
     self.Expect([Cmd("git --version", "git version 1.2.3"),
                  Cmd("git dummy", "")])
-    self.assertEquals("git version 1.2.3", self.MakeStep().Git("--version"))
-    self.assertEquals("", self.MakeStep().Git("dummy"))
+    self.assertEqual("git version 1.2.3", self.MakeStep().Git("--version"))
+    self.assertEqual("", self.MakeStep().Git("dummy"))
 
   def testCommonPrepareDefault(self):
     self.Expect([
@@ -535,10 +535,10 @@ class ScriptTest(unittest.TestCase):
     self.WriteFakeVersionFile(build=5)
     step = self.MakeStep()
     step.ReadAndPersistVersion()
-    self.assertEquals("3", step["major"])
-    self.assertEquals("22", step["minor"])
-    self.assertEquals("5", step["build"])
-    self.assertEquals("0", step["patch"])
+    self.assertEqual("3", step["major"])
+    self.assertEqual("22", step["minor"])
+    self.assertEqual("5", step["build"])
+    self.assertEqual("0", step["patch"])
 
   def testRegex(self):
     self.assertEqual("(issue 321)",
@@ -568,7 +568,7 @@ class ScriptTest(unittest.TestCase):
     ])
 
     self.RunStep(PushToCandidates, PreparePushRevision)
-    self.assertEquals("push_hash", self._state["push_hash"])
+    self.assertEqual("push_hash", self._state["push_hash"])
 
   def testPrepareChangeLog(self):
     self.WriteFakeVersionFile()
@@ -623,7 +623,7 @@ class ScriptTest(unittest.TestCase):
 #
 #"""
 
-    self.assertEquals(expected_cl, actual_cl)
+    self.assertEqual(expected_cl, actual_cl)
 
   def testEditChangeLog(self):
     TEST_CONFIG["CHANGELOG_ENTRY_FILE"] = self.MakeEmptyTempFile()
@@ -636,7 +636,7 @@ class ScriptTest(unittest.TestCase):
 
     self.RunStep(PushToCandidates, EditChangeLog)
 
-    self.assertEquals("New\n        Lines",
+    self.assertEqual("New\n        Lines",
                       FileToText(TEST_CONFIG["CHANGELOG_ENTRY_FILE"]))
 
   TAGS = """
@@ -659,10 +659,10 @@ test_tag
 
     self.RunStep(PushToCandidates, IncrementVersion)
 
-    self.assertEquals("3", self._state["new_major"])
-    self.assertEquals("22", self._state["new_minor"])
-    self.assertEquals("7", self._state["new_build"])
-    self.assertEquals("0", self._state["new_patch"])
+    self.assertEqual("3", self._state["new_major"])
+    self.assertEqual("22", self._state["new_minor"])
+    self.assertEqual("7", self._state["new_build"])
+    self.assertEqual("0", self._state["new_patch"])
 
   def _TestSquashCommits(self, change_log, expected_msg):
     TEST_CONFIG["CHANGELOG_ENTRY_FILE"] = self.MakeEmptyTempFile()
@@ -677,7 +677,7 @@ test_tag
     self._state["date"] = "1999-11-11"
 
     self.RunStep(PushToCandidates, SquashCommits)
-    self.assertEquals(FileToText(TEST_CONFIG["COMMITMSG_FILE"]), expected_msg)
+    self.assertEqual(FileToText(TEST_CONFIG["COMMITMSG_FILE"]), expected_msg)
 
     patch = FileToText(TEST_CONFIG["PATCH_FILE"])
     self.assertTrue(re.search(r"patch content", patch))
@@ -771,7 +771,7 @@ Performance and stability improvements on all platforms."""
 
     def CheckVersionCommit():
       commit = FileToText(TEST_CONFIG["COMMITMSG_FILE"])
-      self.assertEquals(commit_msg, commit)
+      self.assertEqual(commit_msg, commit)
       version = FileToText(
           os.path.join(TEST_CONFIG["DEFAULT_CWD"], VERSION_FILE))
       self.assertTrue(re.search(r"#define V8_MINOR_VERSION\s+22", version))
@@ -785,7 +785,7 @@ Performance and stability improvements on all platforms."""
       # modified.
       change_log = FileToText(
           os.path.join(TEST_CONFIG["DEFAULT_CWD"], CHANGELOG_FILE))
-      self.assertEquals(
+      self.assertEqual(
 """1999-07-31: Version 3.22.5
 
         Log text 1 (issue 321).
@@ -915,7 +915,7 @@ TBR=reviewer@chromium.org"""
 
     def CheckVersionCommit():
       commit = FileToText(TEST_CONFIG["COMMITMSG_FILE"])
-      self.assertEquals(commit_msg, commit)
+      self.assertEqual(commit_msg, commit)
       version = FileToText(
           os.path.join(TEST_CONFIG["DEFAULT_CWD"], VERSION_FILE))
       self.assertTrue(re.search(r"#define V8_MINOR_VERSION\s+22", version))
@@ -929,7 +929,7 @@ TBR=reviewer@chromium.org"""
       # modified.
       change_log = FileToText(
           os.path.join(TEST_CONFIG["DEFAULT_CWD"], CHANGELOG_FILE))
-      self.assertEquals(
+      self.assertEqual(
 """1999-07-31: Version 3.22.5
 
         Log text 1 (issue 321).
@@ -1075,9 +1075,9 @@ deps = {
         AUTO_PUSH_ARGS + [
           "-c", TEST_CONFIG["CHROMIUM"],
           "--json-output", json_output_file])
-    self.assertEquals(0, result)
+    self.assertEqual(0, result)
     json_output = json.loads(FileToText(json_output_file))
-    self.assertEquals("up_to_date", json_output["monitoring_state"])
+    self.assertEqual("up_to_date", json_output["monitoring_state"])
 
 
   def testChromiumRoll(self):
@@ -1133,7 +1133,7 @@ deps = {
     self.assertTrue(re.search("\"v8_revision\": \"22624\"", deps))
 
     json_output = json.loads(FileToText(json_output_file))
-    self.assertEquals("success", json_output["monitoring_state"])
+    self.assertEqual("success", json_output["monitoring_state"])
 
   def testCheckLastPushRecently(self):
     self.Expect([
@@ -1146,7 +1146,7 @@ deps = {
     ])
 
     self._state["candidate"] = "abc123"
-    self.assertEquals(0, self.RunStep(
+    self.assertEqual(0, self.RunStep(
         auto_push.AutoPush, LastReleaseBailout, AUTO_PUSH_ARGS))
 
   def testAutoPush(self):
@@ -1167,7 +1167,7 @@ deps = {
     state = json.loads(FileToText("%s-state.json"
                                   % TEST_CONFIG["PERSISTFILE_BASENAME"]))
 
-    self.assertEquals("abc123", state["candidate"])
+    self.assertEqual("abc123", state["candidate"])
 
   def testRollMerge(self):
     TEST_CONFIG["ALREADY_MERGING_SENTINEL_FILE"] = self.MakeEmptyTempFile()
@@ -1177,7 +1177,7 @@ deps = {
     extra_patch = self.MakeEmptyTempFile()
 
     def VerifyPatch(patch):
-      return lambda: self.assertEquals(patch,
+      return lambda: self.assertEqual(patch,
           FileToText(TEST_CONFIG["TEMPORARY_PATCH_FILE"]))
 
     msg = """Version 3.22.5.1 (cherry-pick)
@@ -1204,7 +1204,7 @@ LOG=N
 
     def VerifyLand():
       commit = FileToText(TEST_CONFIG["COMMITMSG_FILE"])
-      self.assertEquals(msg, commit)
+      self.assertEqual(msg, commit)
       version = FileToText(
           os.path.join(TEST_CONFIG["DEFAULT_CWD"], VERSION_FILE))
       self.assertTrue(re.search(r"#define V8_MINOR_VERSION\s+22", version))
@@ -1477,7 +1477,7 @@ Cr-Commit-Position: refs/heads/4.2.71@{#1}
            "3.22.3,candidates,345,4567:5677,\r\n"
            "3.21.2,3.21,123,,\r\n"
            "3.3.1.1,3.3,234,,abc12\r\n")
-    self.assertEquals(csv, FileToText(csv_output))
+    self.assertEqual(csv, FileToText(csv_output))
 
     expected_json = {"chrome_releases":{
                                         "canaries": [
@@ -1549,7 +1549,7 @@ Cr-Commit-Position: refs/heads/4.2.71@{#1}
         "revision_link": "https://code.google.com/p/v8/source/detail?r=234",
       },],
     }
-    self.assertEquals(expected_json, json.loads(FileToText(json_output)))
+    self.assertEqual(expected_json, json.loads(FileToText(json_output)))
 
   def testMergeToBranch(self):
     TEST_CONFIG["ALREADY_MERGING_SENTINEL_FILE"] = self.MakeEmptyTempFile()
@@ -1560,7 +1560,7 @@ Cr-Commit-Position: refs/heads/4.2.71@{#1}
 
 
     def VerifyPatch(patch):
-      return lambda: self.assertEquals(patch,
+      return lambda: self.assertEqual(patch,
           FileToText(TEST_CONFIG["TEMPORARY_PATCH_FILE"]))
 
     info_msg = ("NOTE: This script will no longer automatically "
@@ -1594,7 +1594,7 @@ NOTREECHECKS=true
 
     def VerifyLand():
       commit = FileToText(TEST_CONFIG["COMMITMSG_FILE"])
-      self.assertEquals(msg, commit)
+      self.assertEqual(msg, commit)
 
     self.Expect([
       Cmd("git status -s -uno", ""),
@@ -1847,7 +1847,7 @@ Cr-Commit-Position: refs/heads/4.2.71@{#1}
            "3.22.3,candidates,345,4567:5677,\r\n"
            "3.21.2,3.21,123,,\r\n"
            "3.3.1.1,3.3,234,,abc12\r\n")
-    self.assertEquals(csv, FileToText(csv_output))
+    self.assertEqual(csv, FileToText(csv_output))
 
     expected_json = {"chrome_releases":{
                                         "canaries": [
@@ -1919,7 +1919,7 @@ Cr-Commit-Position: refs/heads/4.2.71@{#1}
         "revision_link": "https://code.google.com/p/v8/source/detail?r=234",
       },],
     }
-    self.assertEquals(expected_json, json.loads(FileToText(json_output)))
+    self.assertEqual(expected_json, json.loads(FileToText(json_output)))
 
 if __name__ == '__main__':
   unittest.main()

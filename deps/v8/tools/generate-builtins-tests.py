@@ -149,7 +149,7 @@ def Main():
     ClearGeneratedFiles(options)
     return 0
 
-  print("Unknown action: %s" % action)
+  print(("Unknown action: %s" % action))
   parser.print_help()
   return 1
 

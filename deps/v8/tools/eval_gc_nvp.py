@@ -57,7 +57,7 @@ class Histogram:
 
   def __str__(self):
     ret = []
-    keys = self.histogram.keys()
+    keys = list(self.histogram.keys())
     keys.sort()
     last = keys[len(keys) - 1]
     for i in range(0, last + 1):

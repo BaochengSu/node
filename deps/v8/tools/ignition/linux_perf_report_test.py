@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 import linux_perf_report as ipr
-import StringIO
+import io
 import unittest
 
 
@@ -50,7 +50,7 @@ PERF_SCRIPT_OUTPUT = """
 
 class LinuxPerfReportTest(unittest.TestCase):
   def test_collapsed_callchains_generator(self):
-    perf_stream = StringIO.StringIO(PERF_SCRIPT_OUTPUT)
+    perf_stream = io.StringIO(PERF_SCRIPT_OUTPUT)
     callchains = list(ipr.collapsed_callchains_generator(perf_stream))
     self.assertListEqual(callchains, [
       ['firstSymbol', 'secondSymbol', '[other]'],
@@ -64,7 +64,7 @@ class LinuxPerfReportTest(unittest.TestCase):
     ])
 
   def test_collapsed_callchains_generator_hide_other(self):
-    perf_stream = StringIO.StringIO(PERF_SCRIPT_OUTPUT)
+    perf_stream = io.StringIO(PERF_SCRIPT_OUTPUT)
     callchains = list(ipr.collapsed_callchains_generator(perf_stream,
                                                          hide_other=True,
                                                          hide_compiler=True,
@@ -122,7 +122,7 @@ class LinuxPerfReportTest(unittest.TestCase):
     self.assertItemsEqual(counters, [("bar", 3)])
 
   def test_multiple_handlers(self):
-    perf_stream = StringIO.StringIO("""
+    perf_stream = io.StringIO("""
         0000 foo(bar)
         1234 BytecodeHandler:first
         5678 a::random::call<to>(something, else)

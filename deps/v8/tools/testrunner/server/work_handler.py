@@ -27,7 +27,7 @@
 
 
 import os
-import SocketServer
+import socketserver
 import stat
 import subprocess
 import threading
@@ -39,7 +39,7 @@ from ..network import endpoint
 from ..objects import workpacket
 
 
-class WorkHandler(SocketServer.BaseRequestHandler):
+class WorkHandler(socketserver.BaseRequestHandler):
 
   def handle(self):
     rec = compression.Receiver(self.request)
@@ -79,7 +79,7 @@ class WorkHandler(SocketServer.BaseRequestHandler):
         compression.Send([[-1, error_message]], self.request)
       compression.Send(constants.END_OF_STREAM, self.request)
       return
-    except Exception, e:
+    except Exception as e:
       pass  # Peer is gone. There's nothing we can do.
     # Clean up.
     self._Call("git checkout -f")
@@ -142,9 +142,9 @@ class WorkHandler(SocketServer.BaseRequestHandler):
     return subprocess.call(cmd, shell=True)
 
 
-class WorkSocketServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
+class WorkSocketServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
   def __init__(self, daemon):
     address = (daemon.ip, constants.PEER_PORT)
-    SocketServer.TCPServer.__init__(self, address, WorkHandler)
+    socketserver.TCPServer.__init__(self, address, WorkHandler)
     self.job_lock = threading.Lock()
     self.daemon = daemon

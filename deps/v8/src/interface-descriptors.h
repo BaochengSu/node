@@ -403,7 +403,7 @@ class StoreDescriptor : public CallInterfaceDescriptor {
   static const Register ValueRegister();
   static const Register SlotRegister();
 
-#if V8_TARGET_ARCH_IA32
+#if V8_TARGET_ARCH_IA32 || V8_TARGET_ARCH_X87
   static const bool kPassLastArgsOnStack = true;
 #else
   static const bool kPassLastArgsOnStack = false;

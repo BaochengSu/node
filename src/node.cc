@@ -206,6 +206,8 @@ uint64_t max_http_header_size = 8 * 1024;
 // used by C++ modules as well
 bool no_deprecation = false;
 
+bool insecure_http_parser = false;
+
 #if HAVE_OPENSSL
 // use OpenSSL's cert store instead of bundled certs
 bool ssl_openssl_cert_store =
@@ -2865,6 +2867,11 @@ void SetupProcessObject(Environment* env,
     READONLY_PROPERTY(process, "noDeprecation", True(env->isolate()));
   }
 
+  // --insecure-http-parser
+  if (insecure_http_parser) {
+    READONLY_PROPERTY(process, "insecureHttpParser", True(env->isolate()));
+  }
+
   // --no-warnings
   if (no_process_warnings) {
     READONLY_PROPERTY(process, "noProcessWarnings", True(env->isolate()));
@@ -3403,6 +3410,8 @@ static void ParseArgs(int* argc,
       force_repl = true;
     } else if (strcmp(arg, "--no-deprecation") == 0) {
       no_deprecation = true;
+    } else if (strcmp(arg, "--insecure-http-parser") == 0) {
+      insecure_http_parser = true;
     } else if (strcmp(arg, "--napi-modules") == 0) {
       // no-op
     } else if (strcmp(arg, "--no-warnings") == 0) {

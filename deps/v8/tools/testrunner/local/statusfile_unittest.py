@@ -5,8 +5,8 @@
 
 import unittest
 
-import statusfile
-from utils import Freeze
+from . import statusfile
+from .utils import Freeze
 
 
 TEST_VARIABLES = {
@@ -80,7 +80,7 @@ class StatusFileTest(unittest.TestCase):
         SyntaxError,
         lambda: statusfile._EvalExpression(
             'system==linux and mode=release', variables))
-    self.assertEquals(
+    self.assertEqual(
         statusfile.VARIANT_EXPRESSION,
         statusfile._EvalExpression(
             'system==linux and variant==default', variables)
@@ -90,41 +90,41 @@ class StatusFileTest(unittest.TestCase):
     rules, wildcards = statusfile.ReadStatusFile(
         TEST_STATUS_FILE % 'system==linux', make_variables())
 
-    self.assertEquals(
+    self.assertEqual(
         {
           'foo/bar': set(['PASS', 'SKIP']),
           'baz/bar': set(['PASS', 'FAIL', 'SLOW']),
         },
         rules[''],
     )
-    self.assertEquals(
+    self.assertEqual(
         {
           'foo/*': set(['SLOW', 'FAIL']),
         },
         wildcards[''],
     )
-    self.assertEquals({}, rules['default'])
-    self.assertEquals({}, wildcards['default'])
+    self.assertEqual({}, rules['default'])
+    self.assertEqual({}, wildcards['default'])
 
   def test_read_statusfile_section_false(self):
     rules, wildcards = statusfile.ReadStatusFile(
         TEST_STATUS_FILE % 'system==windows', make_variables())
 
-    self.assertEquals(
+    self.assertEqual(
         {
           'foo/bar': set(['PASS', 'SKIP']),
           'baz/bar': set(['PASS', 'FAIL']),
         },
         rules[''],
     )
-    self.assertEquals(
+    self.assertEqual(
         {
           'foo/*': set(['PASS', 'SLOW']),
         },
         wildcards[''],
     )
-    self.assertEquals({}, rules['default'])
-    self.assertEquals({}, wildcards['default'])
+    self.assertEqual({}, rules['default'])
+    self.assertEqual({}, wildcards['default'])
 
   def test_read_statusfile_section_variant(self):
     rules, wildcards = statusfile.ReadStatusFile(
@@ -132,26 +132,26 @@ class StatusFileTest(unittest.TestCase):
         make_variables(),
     )
 
-    self.assertEquals(
+    self.assertEqual(
         {
           'foo/bar': set(['PASS', 'SKIP']),
           'baz/bar': set(['PASS', 'FAIL']),
         },
         rules[''],
     )
-    self.assertEquals(
+    self.assertEqual(
         {
           'foo/*': set(['PASS', 'SLOW']),
         },
         wildcards[''],
     )
-    self.assertEquals(
+    self.assertEqual(
         {
           'baz/bar': set(['PASS', 'SLOW']),
         },
         rules['default'],
     )
-    self.assertEquals(
+    self.assertEqual(
         {
           'foo/*': set(['FAIL']),
         },
